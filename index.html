@@ -391,6 +391,39 @@
     * { transition: none !important; animation: none !important; }
   }
 
+
+  /* ---- Clinical Decision Tool ---- */
+  .tool-card.clinical { --card-border: #6366f1; }
+  .cdt-wrap { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 16px; align-items: start; margin-top: 14px; }
+  #cdt_nav { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; box-shadow: var(--shadow); position: sticky; top: 12px; }
+  .cdt-gl { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 12px 4px 4px; }
+  .cdt-grp:first-child .cdt-gl { margin-top: 2px; }
+  #cdt_nav button { display: block; width: 100%; text-align: left; padding: 8px 10px; border: 0; background: transparent; color: var(--ink); border-radius: 8px; font-size: 14px; font-family: inherit; cursor: pointer; }
+  #cdt_nav button:hover { background: var(--card-hover); }
+  #cdt_nav button.active { background: var(--accent-light); color: var(--accent); font-weight: 700; }
+  #cdt_panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 22px; box-shadow: var(--shadow); min-width: 0; }
+  .cdt-title { margin: 0; font-size: 20px; color: var(--accent); }
+  .cdt-blurb { margin: 4px 0 16px; color: var(--muted); font-size: 14px; }
+  .cdt-hint, .cdt-foot { font-size: 12px; color: var(--muted); }
+  .cdt-hint { margin-top: 3px; }
+  .cdt-checks { margin-bottom: 8px; }
+  .cdt-chk { display: flex; align-items: flex-start; gap: 10px; text-transform: none; letter-spacing: 0; font-size: 14px; font-weight: 500; color: var(--ink); padding: 8px 10px; margin: 6px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); cursor: pointer; }
+  .cdt-chk input { width: auto; margin: 3px 0 0; flex: none; }
+  .cdt-chk span { flex: 1; }
+  .cdt-chk:has(input:checked) { border-color: var(--accent); background: var(--accent-light); }
+  .cdt-pt { color: var(--accent); font-size: 12px; white-space: nowrap; }
+  .cdt-head { border-left: 5px solid var(--accent); background: var(--card-hover); border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; }
+  .cdt-hk { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+  .cdt-hv { font-size: 24px; font-weight: 800; margin: 2px 0; }
+  .cdt-hs { font-size: 13.5px; }
+  .cdt-msg { color: var(--muted); font-size: 14px; }
+  .cdt-notes { margin-top: 10px; }
+  .cdt-how { margin-top: 16px; }
+  @media (max-width: 860px) {
+    .cdt-wrap { grid-template-columns: 1fr; }
+    #cdt_nav { position: static; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 12px; }
+  }
+
   /* ---- Vitals & GCS tool ---- */
   .tool-card.vitals { --card-border: #f59e0b; }
   .vpanel { display: none; background: var(--card); border: 1px solid var(--line); border-radius: 0 10px 10px 10px; padding: 22px; box-shadow: var(--shadow); }
@@ -498,6 +531,7 @@
   <button class="sb-item" data-screen="safety" onclick="goScreen('safety')"><span class="sb-ico">&#128737;&#65039;</span>Prescriptions Safety Checker</button>
   <button class="sb-item" data-screen="vaccines" onclick="goScreen('vaccines')"><span class="sb-ico">&#128137;</span>Egyptian Immunization</button>
 
+  <button class="sb-item" data-screen="clinical" onclick="goScreen('clinical')"><span class="sb-ico">&#129518;</span>Clinical Decision Tool</button>
   <button class="sb-item" data-screen="vitals" onclick="goScreen('vitals')"><span class="sb-ico">&#129658;</span>Vitals &amp; GCS</button>
   <div class="sb-subs" data-screen="vitals">
     <button class="sb-sub" data-screen="vitals" data-tab="vitals" onclick="goTab('vitals','vitals')">Vital signs check</button>
@@ -573,6 +607,15 @@
         <p class="tool-desc">Official Egyptian MOHP mandatory childhood schedule from birth to school entry with age milestone filters.</p>
       </div>
       <span class="tool-cta">View Timetable <span>&#8594;</span></span>
+    </div>
+
+    <div class="tool-card clinical" role="button" tabindex="0" onclick="showScreen('clinical')">
+      <div>
+        <div class="tool-icon">&#129518;</div>
+        <h3 class="tool-title">Clinical Decision Tool</h3>
+        <p class="tool-desc">BMI/BSA, eGFR, corrected calcium and sodium, anion gap, CHA&#8322;DS&#8322;-VASc, HAS-BLED, Wells, CURB-65, APACHE II, GCS, doses and infusions, each with method, interpretation and limits.</p>
+      </div>
+      <span class="tool-cta">Open Calculators <span>&#8594;</span></span>
     </div>
 
     <div class="tool-card vitals" role="button" tabindex="0" onclick="showScreen('vitals')">
@@ -819,6 +862,14 @@ w*0.01
   </div>
 </div>
 
+<!-- CLINICAL DECISION TOOL SCREEN -->
+<div id="screen-clinical" class="screen" hidden>
+  <div class="cdt-wrap">
+    <div id="cdt_nav" aria-label="Calculators"></div>
+    <div id="cdt_panel"></div>
+  </div>
+</div>
+
 <!-- VITALS & GCS SCREEN -->
 <div id="screen-vitals" class="screen" hidden>
   <nav id="vtabs">
@@ -933,7 +984,8 @@ const SCREENS = {
   interactions: ["Drug Interactions", "Interactions and contraindications from FDA drug labels"],
   safety: ["Prescriptions Safety Checker", "Interactions, allergies, duplicates, contraindications, dose errors and monitoring"],
   vaccines: ["Egyptian Vaccination Schedule", "Official MOHP routine childhood immunization timetable"],
-  vitals: ["Vitals & GCS", "Age-based vital sign ranges and paediatric Glasgow Coma Scale"]
+  vitals: ["Vitals & GCS", "Age-based vital sign ranges and paediatric Glasgow Coma Scale"],
+  clinical: ["Clinical Decision Tool", "Calculators and validated scores with method, interpretation and limitations"]
 };
 
 let currentScreen = "home";
@@ -3287,6 +3339,465 @@ window.addEventListener("resize", () => { setHeaderH(); if (!SB_MOBILE()) closeS
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeSidebarMobile(); });
 try { if (localStorage.getItem("dochelp_sidebar") === "closed") document.body.classList.add("sb-collapsed"); } catch (e) {}
 setHeaderH();
+
+
+/* ===== Clinical Decision Tool: calculators and validated scores ===== */
+(function () {
+  const num = v => { if (v === "" || v == null) return null; const x = parseFloat(v); return isFinite(x) ? x : null; };
+  const fx = (x, d) => Number(x).toFixed(d === undefined ? 1 : d);
+  const tr = (x, d) => String(parseFloat(Number(x).toFixed(d === undefined ? 1 : d)));
+  const N = (id, label, o) => Object.assign({t: "n", id, label}, o || {});
+  const S = (id, label, options, o) => Object.assign({t: "s", id, label, options}, o || {});
+  const C = (id, label, pts, o) => Object.assign({t: "c", id, label, pts}, o || {});
+  const KG = N("w", "Weight (kg)", {min: 0});
+  const MGDL = 18.016, CA_MMOL = 4.008;
+
+  // points from checkbox fields (pts) and select fields flagged pts:true
+  function sumPts(c, v) {
+    let s = 0;
+    for (const f of c.fields) {
+      if (f.t === "c" && v[f.id]) s += f.pts;
+      else if (f.t === "s" && f.pts) s += Number(v[f.id]) || 0;
+    }
+    return s;
+  }
+
+  const CALCS = [
+  /* ---------------------------------------------------------------- BMI + BSA */
+  {id: "bmi", group: "Body size & renal function", title: "BMI & body surface area",
+   blurb: "Body mass index plus three body surface area formulas.",
+   fields: [KG, N("h", "Height (cm)", {min: 0}), N("age", "Age (years, optional)", {min: 0, hint: "Decides which BMI interpretation is shown"})],
+   calc(v) {
+     if (!v.w || !v.h) return {msg: "Enter weight and height."};
+     const m = v.h / 100, bmi = v.w / (m * m);
+     const mos = Math.sqrt(v.h * v.w / 3600), dub = 0.007184 * Math.pow(v.w, 0.425) * Math.pow(v.h, 0.725), hay = 0.024265 * Math.pow(v.w, 0.5378) * Math.pow(v.h, 0.3964);
+     const peds = v.age !== null && v.age < 18;
+     let cat = "", lvl = "info", sub = "";
+     if (peds) sub = "Under 18: do not use adult cut-offs. Plot BMI-for-age on a CDC (2 y and over) or WHO (under 2 y) chart.";
+     else {
+       [cat, lvl] = bmi < 18.5 ? ["Underweight", "warn"] : bmi < 25 ? ["Normal range", "ok"] : bmi < 30 ? ["Overweight", "warn"] : bmi < 35 ? ["Obesity class I", "bad"] : bmi < 40 ? ["Obesity class II", "bad"] : ["Obesity class III", "bad"];
+       sub = "WHO adult categories" + (v.age === null ? " (age not entered, assuming 18 or over)" : "");
+     }
+     return {head: {k: "BMI", v: fx(bmi) + " kg/m\u00b2" + (cat ? " \u2022 " + cat : ""), lvl, sub},
+       rows: [["BSA, Mosteller", fx(mos, 2) + " m\u00b2"], ["BSA, DuBois & DuBois", fx(dub, 2) + " m\u00b2"], ["BSA, Haycock (suited to children)", fx(hay, 2) + " m\u00b2"]],
+       notes: ["Mosteller is the most widely used for chemotherapy and drug dosing; Haycock was derived in neonates, children and adults."]};
+   },
+   how: {inputs: ["Weight in kg, height in cm. Age is optional and only picks the BMI interpretation."],
+     formula: ["BMI = weight (kg) / height (m)\u00b2.", "Mosteller: BSA = \u221a(height cm \u00d7 weight kg / 3600).", "DuBois: BSA = 0.007184 \u00d7 W^0.425 \u00d7 H^0.725.", "Haycock: BSA = 0.024265 \u00d7 W^0.5378 \u00d7 H^0.3964."],
+     interp: ["Adults (WHO): under 18.5 underweight, 18.5-24.9 normal, 25-29.9 overweight, 30 or over obesity (class I 30-34.9, II 35-39.9, III 40 or over).", "Children: BMI is only meaningful as an age- and sex-specific percentile (commonly 85th = overweight, 95th = obesity on CDC charts)."],
+     limits: ["BMI does not separate fat from muscle and ignores fat distribution; ethnic-specific cut-offs may apply (e.g. lower for South Asian adults).", "This tool does not compute BMI percentiles for children.", "BSA formulas can differ by 5-10% in extremes of size, pregnancy or oedema; use actual measured values."]}},
+
+  /* ---------------------------------------------------------------- renal */
+  {id: "renal", group: "Body size & renal function", title: "Creatinine clearance & eGFR",
+   blurb: "Cockcroft-Gault and CKD-EPI 2021 for adults, bedside Schwartz for children.",
+   fields: [N("age", "Age (years)", {min: 0}), S("sex", "Sex", [["m", "Male"], ["f", "Female"]]), KG, N("h", "Height (cm)", {min: 0, hint: "Needed for children"}),
+     N("scr", "Serum creatinine", {min: 0}), S("scrU", "Creatinine unit", [["mg", "mg/dL"], ["umol", "\u00b5mol/L"]])],
+   calc(v) {
+     if (v.age === null || !v.scr) return {msg: "Enter age and serum creatinine."};
+     const scr = v.scrU === "umol" ? v.scr / 88.4 : v.scr, rows = [], notes = [];
+     let head = null;
+     const stage = e => e >= 90 ? "G1" : e >= 60 ? "G2" : e >= 45 ? "G3a" : e >= 30 ? "G3b" : e >= 15 ? "G4" : "G5";
+     const lv = e => e >= 60 ? "ok" : e >= 30 ? "warn" : "bad";
+     if (v.age >= 18) {
+       const k = v.sex === "f" ? 0.7 : 0.9, a = v.sex === "f" ? -0.241 : -0.302;
+       const ck = 142 * Math.pow(Math.min(scr / k, 1), a) * Math.pow(Math.max(scr / k, 1), -1.2) * Math.pow(0.9938, v.age) * (v.sex === "f" ? 1.012 : 1);
+       head = {k: "eGFR, CKD-EPI 2021 (race-free)", v: fx(ck, 0) + " mL/min/1.73 m\u00b2 \u2022 " + stage(ck), lvl: lv(ck), sub: "Staging assumes the result is stable and has persisted for 3 months or more."};
+       if (v.w) { const cg = (140 - v.age) * v.w / (72 * scr) * (v.sex === "f" ? 0.85 : 1); rows.push(["Creatinine clearance, Cockcroft-Gault", fx(cg, 0) + " mL/min"]); notes.push("Cockcroft-Gault uses actual weight here. In obesity many references use adjusted body weight; in oedema or ascites it overestimates."); }
+       else rows.push(["Creatinine clearance, Cockcroft-Gault", "Enter weight"]);
+     } else {
+       if (!v.h) return {msg: "Under 18: enter height for the bedside Schwartz equation."};
+       const sc = 0.413 * v.h / scr;
+       head = {k: "eGFR, bedside Schwartz", v: fx(sc, 0) + " mL/min/1.73 m\u00b2 \u2022 " + stage(sc), lvl: lv(sc), sub: v.age < 1 ? "Unreliable under 1 year: creatinine reflects maternal levels and immature muscle mass." : "Validated for children with CKD, roughly 1 to 16 years."};
+       notes.push("Adult equations (CKD-EPI, Cockcroft-Gault) are not shown for patients under 18.");
+     }
+     rows.push(["Creatinine used", fx(scr, 2) + " mg/dL (" + fx(scr * 88.4, 0) + " \u00b5mol/L)"]);
+     return {head, rows, notes};
+   },
+   how: {inputs: ["Age, sex, weight, height and serum creatinine (mg/dL or \u00b5mol/L). Children need height; Cockcroft-Gault needs weight."],
+     formula: ["CKD-EPI 2021: 142 \u00d7 min(Scr/\u03ba,1)^\u03b1 \u00d7 max(Scr/\u03ba,1)^-1.200 \u00d7 0.9938^age \u00d7 1.012 if female. \u03ba = 0.7 (F) or 0.9 (M); \u03b1 = -0.241 (F) or -0.302 (M).", "Cockcroft-Gault: (140 - age) \u00d7 weight / (72 \u00d7 Scr), \u00d7 0.85 if female.", "Bedside Schwartz: 0.413 \u00d7 height (cm) / Scr (mg/dL)."],
+     interp: ["KDIGO stages: G1 90 or more, G2 60-89, G3a 45-59, G3b 30-44, G4 15-29, G5 under 15 mL/min/1.73 m\u00b2 (CKD diagnosis also needs markers of kidney damage or 3 months' duration)."],
+     limits: ["All equations assume steady-state creatinine; they are invalid in acute kidney injury, rapidly changing function, pregnancy, dialysis and extremes of muscle mass or diet.", "Cockcroft-Gault gives mL/min (not indexed to BSA), which is what many drug labels use; eGFR is indexed to 1.73 m\u00b2.", "Cystatin C-based estimates are preferred when creatinine is unreliable."]}},
+
+  /* ---------------------------------------------------------------- Ca / Na */
+  {id: "casod", group: "Electrolytes & acid-base", title: "Corrected calcium & sodium correction",
+   blurb: "Albumin-corrected calcium and glucose-corrected sodium. Fill in either pair.",
+   fields: [N("ca", "Total calcium", {min: 0}), S("caU", "Calcium unit", [["mg", "mg/dL"], ["mmol", "mmol/L"]]), N("alb", "Albumin", {min: 0}), S("albU", "Albumin unit", [["g", "g/dL"], ["gl", "g/L"]]),
+     N("na", "Measured sodium (mmol/L)", {min: 0}), N("glu", "Glucose", {min: 0}), S("gluU", "Glucose unit", [["mg", "mg/dL"], ["mmol", "mmol/L"]])],
+   calc(v) {
+     const rows = [], notes = []; let head = null;
+     if (v.ca && v.alb) {
+       const ca = v.caU === "mmol" ? v.ca * CA_MMOL : v.ca, al = v.albU === "gl" ? v.alb / 10 : v.alb;
+       const cc = ca + 0.8 * (4 - al), lvl = cc < 8.5 ? "warn" : cc > 10.5 ? "bad" : "ok";
+       head = {k: "Corrected calcium", v: fx(cc, 1) + " mg/dL (" + fx(cc / CA_MMOL, 2) + " mmol/L)", lvl, sub: cc < 8.5 ? "Below the usual adult range (8.5-10.5 mg/dL; 2.12-2.62 mmol/L)" : cc > 10.5 ? "Above the usual adult range (8.5-10.5 mg/dL; 2.12-2.62 mmol/L)" : "Within the usual adult range (8.5-10.5 mg/dL; 2.12-2.62 mmol/L)"};
+       if (al >= 4) notes.push("Albumin is 4 g/dL or higher, so the correction adds nothing (or lowers calcium). Many references only correct when albumin is low.");
+     }
+     if (v.na && v.glu) {
+       const g = v.gluU === "mmol" ? v.glu * MGDL : v.glu, ex = Math.max(0, g - 100) / 100;
+       const k = v.na + 1.6 * ex, h = v.na + 2.4 * ex;
+       rows.push(["Corrected sodium, 1.6 factor (Katz)", fx(k, 1) + " mmol/L"], ["Corrected sodium, 2.4 factor (Hillier)", fx(h, 1) + " mmol/L"]);
+       if (!head) head = {k: "Corrected sodium (1.6 / 2.4)", v: fx(k, 0) + " / " + fx(h, 0) + " mmol/L", lvl: k < 135 ? "warn" : k > 145 ? "bad" : "ok", sub: "Usual range 135-145 mmol/L"};
+       if (g <= 100) notes.push("Glucose is 100 mg/dL or lower, so no correction is applied.");
+       else if (g > 400) notes.push("The 2.4 factor is generally favoured when glucose is above about 400 mg/dL (22 mmol/L).");
+     }
+     if (!head) return {msg: "Enter calcium with albumin, and/or sodium with glucose."};
+     if (v.ca && v.alb) rows.unshift(["Entered total calcium / albumin", fx(v.caU === "mmol" ? v.ca * CA_MMOL : v.ca, 1) + " mg/dL / " + fx(v.albU === "gl" ? v.alb / 10 : v.alb, 1) + " g/dL"]);
+     notes.push("If it matters clinically, measure ionised calcium.");
+     return {head, rows, notes};
+   },
+   how: {inputs: ["Total calcium, albumin, measured sodium and glucose, in either unit system. Values are converted internally (calcium mmol/L \u00d7 4.008, glucose mmol/L \u00d7 18.016, albumin g/L \u00f7 10)."],
+     formula: ["Corrected Ca (mg/dL) = measured Ca + 0.8 \u00d7 (4.0 - albumin g/dL).", "Corrected Na = measured Na + factor \u00d7 (glucose mg/dL - 100) / 100, with factor 1.6 (Katz) or 2.4 (Hillier)."],
+     interp: ["Corrected calcium outside about 8.5-10.5 mg/dL suggests hypo- or hypercalcaemia. Corrected sodium shows the sodium you would expect once glucose-driven water shift is removed; a corrected value that is still low means true hyponatraemia, a high one means true water deficit."],
+     limits: ["The albumin correction is unreliable in critical illness, renal failure, acid-base disturbances, paraproteinaemia and in children (reference ranges differ by age). Ionised calcium is the reference standard.", "Glucose correction factors are empirical estimates; they assume osmotic water shift only and are less accurate at very high glucose.", "Do not use either to set the rate of sodium correction. Follow serial measured values."]}},
+
+  /* ---------------------------------------------------------------- AG + osm */
+  {id: "agosm", group: "Electrolytes & acid-base", title: "Anion gap & serum osmolality",
+   blurb: "Anion gap (with albumin correction and delta ratio), calculated osmolality and osmolar gap.",
+   fields: [N("na", "Sodium (mmol/L)", {min: 0}), N("cl", "Chloride (mmol/L)", {min: 0}), N("hco3", "Bicarbonate (mmol/L)", {min: 0}), N("alb", "Albumin (g/dL, optional)", {min: 0}),
+     N("glu", "Glucose", {min: 0}), S("gluU", "Glucose unit", [["mg", "mg/dL"], ["mmol", "mmol/L"]]), N("bun", "BUN / urea", {min: 0}), S("bunU", "Urea unit", [["mg", "BUN mg/dL"], ["mmol", "Urea mmol/L"]]),
+     N("osm", "Measured osmolality (mOsm/kg, optional)", {min: 0}), N("etoh", "Ethanol (mg/dL, optional)", {min: 0})],
+   calc(v) {
+     const rows = [], notes = []; let head = null;
+     if (v.na !== null && v.cl !== null && v.hco3 !== null) {
+       const ag = v.na - v.cl - v.hco3; let adj = ag;
+       rows.push(["Anion gap (Na - Cl - HCO\u2083)", fx(ag, 0) + " mmol/L"]);
+       if (v.alb !== null) { adj = ag + 2.5 * (4 - v.alb); rows.push(["Albumin-corrected anion gap", fx(adj, 1) + " mmol/L"]); }
+       head = {k: v.alb !== null ? "Albumin-corrected anion gap" : "Anion gap", v: fx(adj, 0) + " mmol/L", lvl: adj > 12 ? "bad" : adj < 3 ? "warn" : "ok", sub: adj > 12 ? "Raised (conventional reference about 8-12 mmol/L; check your lab's range)" : adj < 3 ? "Unusually low: check for hypoalbuminaemia, paraproteins, bromide or lab error" : "Within the conventional range (about 8-12 mmol/L)"};
+       if (adj > 12 && v.hco3 < 24) {
+         const dd = (adj - 12) / (24 - v.hco3);
+         rows.push(["Delta ratio \u0394AG / \u0394HCO\u2083", fx(dd, 2)]);
+         notes.push(dd < 0.4 ? "Delta ratio under 0.4: suggests an additional non-anion-gap (hyperchloraemic) acidosis." : dd < 1 ? "Delta ratio 0.4-1: mixed raised and normal anion gap acidosis." : dd <= 2 ? "Delta ratio 1-2: consistent with a pure raised anion gap acidosis." : "Delta ratio over 2: suggests a coexisting metabolic alkalosis or pre-existing high bicarbonate.");
+       }
+     }
+     if (v.na !== null && v.glu !== null && v.bun !== null) {
+       const g = v.gluU === "mmol" ? v.glu * MGDL : v.glu, b = v.bunU === "mmol" ? v.bun * 2.8 : v.bun;
+       const calc = 2 * v.na + g / 18 + b / 2.8 + (v.etoh ? v.etoh / 4.6 : 0);
+       rows.push(["Calculated osmolality", fx(calc, 0) + " mOsm/kg" + (v.etoh ? " (includes ethanol)" : "")]);
+       if (!head) head = {k: "Calculated osmolality", v: fx(calc, 0) + " mOsm/kg", lvl: calc > 295 ? "warn" : "ok", sub: "Normal about 275-295 mOsm/kg"};
+       if (v.osm) {
+         const og = v.osm - calc;
+         rows.push(["Osmolar gap (measured - calculated)", fx(og, 0) + " mOsm/kg"]);
+         notes.push(og > 10 ? "Osmolar gap above 10: unmeasured osmoles (e.g. methanol, ethylene glycol, isopropanol, mannitol, ketones, lactate). With an anion gap acidosis, consider toxic alcohols and seek toxicology advice." : "Osmolar gap 10 or below (normal range is roughly -10 to +10).");
+       }
+     }
+     if (!head) return {msg: "Enter sodium, chloride and bicarbonate, and/or sodium, glucose and BUN."};
+     return {head, rows, notes};
+   },
+   how: {inputs: ["Sodium, chloride, bicarbonate (anion gap); add albumin for the corrected gap. Sodium, glucose and BUN/urea give calculated osmolality; add measured osmolality (and ethanol if known) for the gap."],
+     formula: ["Anion gap = Na - (Cl + HCO\u2083); potassium is excluded.", "Corrected AG = AG + 2.5 \u00d7 (4.0 - albumin g/dL).", "Delta ratio = (AG - 12) / (24 - HCO\u2083).", "Calculated osmolality = 2 \u00d7 Na + glucose (mg/dL)/18 + BUN (mg/dL)/2.8 (+ ethanol (mg/dL)/4.6).", "Osmolar gap = measured - calculated osmolality."],
+     interp: ["A raised AG (above about 12) points to lactic acidosis, ketoacidosis, uraemia or toxins (methanol, ethylene glycol, salicylate, etc.). A normal AG acidosis suggests bicarbonate loss (diarrhoea, renal tubular acidosis) or chloride load."],
+     limits: ["Normal ranges depend on the analyser (ion-selective electrodes give lower reference values); use your lab's range.", "The albumin correction and the 12/24 baselines in the delta ratio are approximations; the delta ratio is unreliable in chronic respiratory acid-base disorders.", "A normal osmolar gap does not exclude toxic alcohol ingestion if the patient presents late, when parent alcohols are metabolised."]}},
+
+  /* ---------------------------------------------------------------- CHA2DS2-VASc */
+  {id: "chads", group: "Risk scores", title: "CHA\u2082DS\u2082-VASc",
+   blurb: "Stroke risk in non-valvular atrial fibrillation.",
+   fields: [C("chf", "Congestive heart failure / LV dysfunction", 1), C("htn", "Hypertension", 1), C("dm", "Diabetes mellitus", 1), C("stroke", "Prior stroke, TIA or thromboembolism", 2), C("vasc", "Vascular disease (prior MI, PAD, aortic plaque)", 1),
+     S("age", "Age", [[0, "Under 65"], [1, "65 to 74 (+1)"], [2, "75 or over (+2)"]], {pts: true}), S("sex", "Sex", [[0, "Male"], [1, "Female (+1)"]], {pts: true})],
+   calc(v, c) {
+     const s = sumPts(c, v), female = Number(v.sex) === 1;
+     const risk = [0.2, 0.6, 2.2, 3.2, 4.8, 7.2, 9.7, 11.2, 10.8, 12.2][Math.min(s, 9)];
+     const thr = female ? 3 : 2;
+     const [txt, lvl] = s >= thr ? ["Oral anticoagulation is recommended (annual stroke risk about 2% or more).", "bad"] : s === thr - 1 ? ["Anticoagulation is reasonable to consider; weigh bleeding risk and patient preference.", "warn"] : ["Low risk: anticoagulation is generally not needed.", "ok"];
+     return {head: {k: "CHA\u2082DS\u2082-VASc score", v: String(s) + " / 9", lvl, sub: txt}, rows: [["Approx. annual ischaemic stroke rate without anticoagulation", "about " + risk + "%"]],
+       notes: ["Pair with a bleeding assessment (see HAS-BLED) and correct modifiable bleeding risks; a high bleeding score is not by itself a reason to withhold anticoagulation."]};
+   },
+   how: {inputs: ["Tick each condition present. Age and sex are selected from the lists."],
+     formula: ["Score = CHF 1 + hypertension 1 + age 75 or over 2 + diabetes 1 + stroke/TIA/thromboembolism 2 + vascular disease 1 + age 65-74 1 + female sex 1 (range 0-9)."],
+     interp: ["Following the 2023 ACC/AHA/ACCP/HRS guideline: anticoagulation recommended at 2 or more in men and 3 or more in women; reasonable at 1 in men and 2 in women; not needed at 0 (men) or 1 (women, sex alone).", "Stroke-rate figures are from a large Swedish cohort (Friberg 2012) and vary by population."],
+     limits: ["Validated for non-valvular AF only; mechanical valves and moderate-to-severe mitral stenosis need anticoagulation regardless.", "Female sex is a risk modifier rather than an independent risk factor; the 2024 ESC guideline uses CHA\u2082DS\u2082-VA (sex removed).", "Moderate discrimination; does not include imaging, biomarkers or AF burden. Not for children."]}},
+
+  /* ---------------------------------------------------------------- HAS-BLED */
+  {id: "hasbled", group: "Risk scores", title: "HAS-BLED",
+   blurb: "Major bleeding risk in patients on or considered for anticoagulation for AF.",
+   fields: [C("htn", "Hypertension: uncontrolled, systolic over 160 mmHg", 1), C("renal", "Abnormal renal function: dialysis, transplant or creatinine over 2.26 mg/dL (200 \u00b5mol/L)", 1), C("liver", "Abnormal liver function: cirrhosis, or bilirubin over 2\u00d7 normal with AST/ALT/ALP over 3\u00d7 normal", 1),
+     C("stroke", "Prior stroke", 1), C("bleed", "Prior major bleeding or predisposition (anaemia, thrombocytopenia)", 1), C("inr", "Labile INR (time in therapeutic range under 60%; warfarin only)", 1), C("age", "Elderly: age over 65", 1),
+     C("drug", "Drugs: antiplatelets or NSAIDs", 1), C("alc", "Alcohol: 8 or more drinks per week", 1)],
+   calc(v, c) {
+     const s = sumPts(c, v);
+     const rate = [1.13, 1.02, 1.88, 3.74, 8.7, 12.5][Math.min(s, 5)];
+     const [txt, lvl] = s >= 3 ? ["High bleeding risk: review and correct modifiable factors and arrange closer follow-up.", "bad"] : s === 2 ? ["Moderate bleeding risk.", "warn"] : ["Low bleeding risk.", "ok"];
+     const mod = ["htn", "inr", "drug", "alc"].filter(k => v[k]).length;
+     return {head: {k: "HAS-BLED score", v: String(s) + " / 9", lvl, sub: txt}, rows: [["Approx. major bleeds per 100 patient-years", "about " + rate + (s >= 5 ? " (5 or more)" : "")]],
+       notes: [mod ? mod + " modifiable factor(s) ticked (blood pressure, labile INR, drugs, alcohol): address these first." : "No modifiable factors ticked.", "A high score flags risk to manage, not a reason on its own to withhold anticoagulation."]};
+   },
+   how: {inputs: ["Tick each factor present (1 point each)."],
+     formula: ["Score = Hypertension + Abnormal renal/liver function (1 each) + Stroke + Bleeding history/predisposition + Labile INR + Elderly (over 65) + Drugs/alcohol (1 each). Range 0-9."],
+     interp: ["0-1 low, 2 moderate, 3 or more high risk of major bleeding. Bleeding rates shown are from the Euro Heart Survey derivation cohort (Pisters 2010)."],
+     limits: ["Intended to flag modifiable risks, not to exclude patients from anticoagulation; stroke risk usually outweighs bleeding risk.", "The original score was derived in AF; performance with DOACs is moderate. Does not weigh drug interactions or genetics.", "Not for children."]}},
+
+  /* ---------------------------------------------------------------- Wells DVT */
+  {id: "wellsdvt", group: "Risk scores", title: "Wells score for DVT",
+   blurb: "Pre-test probability of deep vein thrombosis in a symptomatic leg.",
+   fields: [C("ca", "Active cancer (treatment within 6 months or palliative)", 1), C("par", "Paralysis, paresis or recent plaster immobilisation of the leg", 1), C("bed", "Bedridden 3 days or more, or major surgery within 12 weeks", 1), C("tend", "Localised tenderness along the deep venous system", 1),
+     C("leg", "Entire leg swollen", 1), C("calf", "Calf swelling over 3 cm larger than the other leg (10 cm below tibial tuberosity)", 1), C("pit", "Pitting oedema confined to the symptomatic leg", 1), C("coll", "Collateral superficial (non-varicose) veins", 1),
+     C("prev", "Previously documented DVT", 1), C("alt", "Alternative diagnosis at least as likely as DVT", -2)],
+   calc(v, c) {
+     const s = sumPts(c, v);
+     const [tier, lvl, prev, plan] = s >= 3 ? ["High", "bad", "about 50-75%", "Proceed to compression ultrasound; a D-dimer cannot exclude DVT at this level."] : s >= 1 ? ["Moderate", "warn", "about 15-20%", "Use a high-sensitivity D-dimer (negative rules out) or proceed to ultrasound."] : ["Low", "ok", "about 5%", "A negative D-dimer effectively rules out DVT."];
+     return {head: {k: "Wells DVT score", v: fx(s, 0) + " \u2022 " + tier + " probability", lvl, sub: plan}, rows: [["Approximate DVT prevalence in this band", prev], ["Two-tier interpretation", s >= 2 ? "DVT likely (2 or more)" : "DVT unlikely (under 2)"]]};
+   },
+   how: {inputs: ["Tick each finding present. The last item subtracts 2 points."],
+     formula: ["Sum of 9 items worth +1 each, minus 2 if an alternative diagnosis is at least as likely (range -2 to 9)."],
+     interp: ["Three-tier: 3 or more high, 1-2 moderate, 0 or less low. Two-tier: 2 or more DVT likely, under 2 unlikely.", "Combine with D-dimer (age-adjusted where applicable) and compression ultrasound according to your local pathway."],
+     limits: ["Validated in outpatients with a first suspected DVT; less reliable in inpatients, pregnancy, recurrent DVT, upper-limb DVT, prior anticoagulation, and in children.", "Several items are subjective (alternative diagnosis, tenderness). D-dimer is non-specific and rises with age, infection, cancer and pregnancy."]}},
+
+  /* ---------------------------------------------------------------- Wells PE */
+  {id: "wellspe", group: "Risk scores", title: "Wells score for pulmonary embolism",
+   blurb: "Pre-test probability of PE.",
+   fields: [C("dvt", "Clinical signs and symptoms of DVT", 3), C("pe", "PE is the most likely diagnosis, or equally likely", 3), C("hr", "Heart rate over 100 beats/min", 1.5), C("imm", "Immobilisation 3 days or more, or surgery in the previous 4 weeks", 1.5), C("prev", "Previous PE or DVT", 1.5),
+     C("hem", "Haemoptysis", 1), C("mal", "Malignancy (treatment within 6 months or palliative)", 1)],
+   calc(v, c) {
+     const s = sumPts(c, v);
+     const [tier, lvl, prev] = s > 6 ? ["High", "bad", "about 40-67%"] : s >= 2 ? ["Moderate", "warn", "about 16-21%"] : ["Low", "ok", "about 1-4%"];
+     const likely = s > 4;
+     return {head: {k: "Wells PE score", v: tr(s, 1) + " \u2022 " + tier + " probability", lvl, sub: likely ? "PE likely (over 4): proceed to CT pulmonary angiography (or V/Q); start anticoagulation if imaging will be delayed and bleeding risk allows." : "PE unlikely (4 or under): a negative high-sensitivity D-dimer excludes PE; if positive, image."},
+       rows: [["Approximate PE prevalence in this band", prev], ["Two-tier interpretation", likely ? "PE likely (over 4)" : "PE unlikely (4 or under)"]],
+       notes: ["If the patient is haemodynamically unstable, go straight to bedside echo/CTPA; do not wait for a score."]};
+   },
+   how: {inputs: ["Tick each criterion present."],
+     formula: ["Sum of weighted items: DVT signs 3 + PE most likely 3 + HR over 100 1.5 + immobilisation/surgery 1.5 + previous PE/DVT 1.5 + haemoptysis 1 + malignancy 1 (range 0-12.5)."],
+     interp: ["Three-tier: under 2 low, 2-6 moderate, over 6 high. Two-tier: 4 or under PE unlikely, over 4 PE likely.", "PERC may be used instead of D-dimer when pre-test probability is low."],
+     limits: ["Contains a subjective item (PE as likely as other diagnoses) that drives most of the variability.", "Not validated in children or pregnancy (use pregnancy-adapted pathways such as YEARS); D-dimer thresholds are age-adjusted.", "Does not predict severity or prognosis (use sPESI or ESC risk class once PE is confirmed)."]}},
+
+  /* ---------------------------------------------------------------- CURB-65 */
+  {id: "curb", group: "Risk scores", title: "CURB-65",
+   blurb: "Severity of community-acquired pneumonia and site-of-care guidance.",
+   fields: [C("c", "Confusion (new disorientation)", 1), C("u", "Urea over 7 mmol/L (BUN over 19 mg/dL)", 1), C("r", "Respiratory rate 30/min or more", 1), C("b", "Blood pressure: systolic under 90 or diastolic 60 or less mmHg", 1), C("a", "Age 65 or over", 1)],
+   calc(v, c) {
+     const s = sumPts(c, v);
+     const mort = [0.7, 3.2, 13, 17, 41.5, 57][s];
+     const [txt, lvl] = s <= 1 ? ["Low severity: likely suitable for home treatment.", "ok"] : s === 2 ? ["Moderate severity: consider short hospital stay or closely supervised outpatient care.", "warn"] : s === 3 ? ["Severe pneumonia: hospital admission; assess for ICU/high-dependency need.", "bad"] : ["Very severe pneumonia: urgent hospital care and consider ICU.", "bad"];
+     return {head: {k: "CURB-65 score", v: s + " / 5", lvl, sub: txt}, rows: [["30-day mortality in the derivation cohort (Lim 2003)", "about " + mort + "%"]]};
+   },
+   how: {inputs: ["Tick each criterion present. Use presenting values."],
+     formula: ["1 point each: Confusion, Urea, Respiratory rate, low Blood pressure, age 65 or over (range 0-5)."],
+     interp: ["0-1: consider outpatient care. 2: hospital-supervised treatment. 3-5: severe; 4-5 consider ICU assessment (BTS guideline framework).", "CRB-65 (without urea) can be used where urea is not available."],
+     limits: ["Does not account for oxygen saturation, comorbidity, social circumstances, multilobar disease or sepsis; clinical judgement overrides the score.", "Derived in adults; not validated for children. Mortality figures come from older cohorts."]}},
+
+  /* ---------------------------------------------------------------- APACHE II */
+  {id: "apache", group: "Risk scores", title: "APACHE II",
+   blurb: "ICU severity score from the worst values in the first 24 hours. Blank fields are scored as normal.",
+   fields: [N("temp", "Rectal temperature (\u00b0C)"), N("map", "Mean arterial pressure (mmHg)"), N("hr", "Heart rate (/min)"), N("rr", "Respiratory rate (/min, ventilated or not)"),
+     N("fio2", "FiO\u2082 (%)", {hint: "50 or more uses A-a gradient"}), N("pao2", "PaO\u2082 (mmHg)"), N("paco2", "PaCO\u2082 (mmHg)", {hint: "Needed if FiO\u2082 is 50% or more"}),
+     N("ph", "Arterial pH"), N("hco3", "Serum HCO\u2083 (mmol/L)", {hint: "Used only if no pH"}), N("na", "Sodium (mmol/L)"), N("k", "Potassium (mmol/L)"), N("cr", "Creatinine (mg/dL)"),
+     C("arf", "Acute renal failure (doubles creatinine points)", 0), N("hct", "Haematocrit (%)"), N("wbc", "WBC (\u00d710\u00b3/\u00b5L)"), N("gcs", "Glasgow Coma Scale (3-15)", {min: 3}), N("age", "Age (years)"),
+     S("chr", "Chronic health", [[0, "None"], [5, "Severe organ insufficiency or immunocompromised: non-operative or emergency surgery (+5)"], [2, "Severe organ insufficiency or immunocompromised: elective surgery (+2)"]])],
+   calc(v) {
+     const band = (x, rules, low) => { for (const [min, p] of rules) if (x >= min) return p; return low; };
+     let aps = 0, miss = 0; const rows = [];
+     const add = (label, x, p) => { if (x === null) { miss++; return; } aps += p; rows.push([label, String(p)]); };
+     add("Temperature", v.temp, v.temp === null ? 0 : band(v.temp, [[41, 4], [39, 3], [38.5, 1], [36, 0], [34, 1], [32, 2], [30, 3]], 4));
+     add("Mean arterial pressure", v.map, v.map === null ? 0 : band(v.map, [[160, 4], [130, 3], [110, 2], [70, 0], [50, 2]], 4));
+     add("Heart rate", v.hr, v.hr === null ? 0 : band(v.hr, [[180, 4], [140, 3], [110, 2], [70, 0], [55, 2], [40, 3]], 4));
+     add("Respiratory rate", v.rr, v.rr === null ? 0 : band(v.rr, [[50, 4], [35, 3], [25, 1], [12, 0], [10, 1], [6, 2]], 4));
+     // oxygenation
+     if (v.fio2 !== null && v.fio2 >= 50) {
+       if (v.pao2 === null || v.paco2 === null) miss++;
+       else { const aa = v.fio2 / 100 * 713 - v.paco2 / 0.8 - v.pao2, p = band(aa, [[500, 4], [350, 3], [200, 2]], 0); aps += p; rows.push(["Oxygenation (A-a gradient " + fx(aa, 0) + " mmHg)", String(p)]); }
+     } else if (v.pao2 === null) miss++;
+     else { const p = v.pao2 > 70 ? 0 : v.pao2 >= 61 ? 1 : v.pao2 >= 55 ? 3 : 4; aps += p; rows.push(["Oxygenation (PaO\u2082)", String(p)]); }
+     if (v.ph !== null) add("Arterial pH", v.ph, band(v.ph, [[7.7, 4], [7.6, 3], [7.5, 1], [7.33, 0], [7.25, 2], [7.15, 3]], 4));
+     else add("Serum HCO\u2083 (no pH)", v.hco3, v.hco3 === null ? 0 : band(v.hco3, [[52, 4], [41, 3], [32, 1], [22, 0], [18, 2], [15, 3]], 4));
+     add("Sodium", v.na, v.na === null ? 0 : band(v.na, [[180, 4], [160, 3], [155, 2], [150, 1], [130, 0], [120, 2], [111, 3]], 4));
+     add("Potassium", v.k, v.k === null ? 0 : band(v.k, [[7, 4], [6, 3], [5.5, 1], [3.5, 0], [3, 1], [2.5, 2]], 4));
+     add("Creatinine" + (v.arf ? " (doubled, ARF)" : ""), v.cr, v.cr === null ? 0 : band(v.cr, [[3.5, 4], [2, 3], [1.5, 2], [0.6, 0]], 2) * (v.arf ? 2 : 1));
+     add("Haematocrit", v.hct, v.hct === null ? 0 : band(v.hct, [[60, 4], [50, 2], [46, 1], [30, 0], [20, 2]], 4));
+     add("White cell count", v.wbc, v.wbc === null ? 0 : band(v.wbc, [[40, 4], [20, 2], [15, 1], [3, 0], [1, 2]], 4));
+     add("Glasgow Coma Scale (15 - GCS)", v.gcs, v.gcs === null ? 0 : Math.max(0, Math.min(12, 15 - v.gcs)));
+     const agep = v.age === null ? 0 : v.age < 45 ? 0 : v.age < 55 ? 2 : v.age < 65 ? 3 : v.age < 75 ? 5 : 6;
+     if (v.age === null) miss++; else rows.push(["Age points", String(agep)]);
+     const chr = Number(v.chr) || 0; if (chr) rows.push(["Chronic health points", String(chr)]);
+     if (miss >= 13) return {msg: "Enter at least some of the first-24-hour values to calculate the score."};
+     const total = aps + agep + chr;
+     const bands = [[4, "4%", "1%"], [9, "8%", "3%"], [14, "15%", "7%"], [19, "25%", "12%"], [24, "40%", "30%"], [29, "55%", "35%"], [34, "73%", "73%"], [99, "85%", "88%"]];
+     const b = bands.find(x => total <= x[0]);
+     const lvl = total >= 25 ? "bad" : total >= 15 ? "warn" : "ok";
+     const notes = ["Approximate hospital mortality from the original 1985 cohort: " + b[1] + " non-operative, " + b[2] + " post-operative. Modern ICU mortality is generally lower; use for audit and research stratification, not individual prognosis."];
+     if (miss) notes.unshift(miss + " of 13 inputs not entered and scored as 0 (normal); the score may be underestimated.");
+     return {head: {k: "APACHE II score", v: total + " / 71", lvl, sub: "Acute physiology " + aps + " + age " + agep + " + chronic health " + chr}, rows, notes};
+   },
+   how: {inputs: ["The worst value of each variable in the first 24 hours of ICU admission: temperature, MAP, heart rate, respiratory rate, oxygenation (PaO\u2082, or A-a gradient if FiO\u2082 is 50% or more), pH (or HCO\u2083), sodium, potassium, creatinine, haematocrit, WBC, GCS, plus age and chronic health status."],
+     formula: ["APACHE II = Acute Physiology Score (12 variables, 0-4 points each; GCS contributes 15 - GCS; creatinine doubled in acute renal failure) + age points (under 45: 0, 45-54: 2, 55-64: 3, 65-74: 5, 75 or over: 6) + chronic health points (2 or 5). Maximum 71.", "A-a gradient = FiO\u2082 \u00d7 713 - PaCO\u2082/0.8 - PaO\u2082 (sea level)."],
+     interp: ["Higher scores mean higher risk of in-hospital death. Approximate mortality bands (non-operative / post-operative): 0-4 4%/1%, 5-9 8%/3%, 10-14 15%/7%, 15-19 25%/12%, 20-24 40%/30%, 25-29 55%/35%, 30-34 73%/73%, over 34 85%/88%."],
+     limits: ["Adult ICU tool; not valid for children (use PRISM/PIM). Mortality estimates also depend on the diagnostic category, which this tool does not include.", "Derived in the 1980s; it over-predicts mortality in modern ICUs. APACHE IV, SAPS or SOFA are often preferred.", "Score is only valid on first-24-hour worst values and for a population, not for deciding to withhold care for an individual patient."]}},
+
+  /* ---------------------------------------------------------------- GCS */
+  {id: "gcs", group: "Neurology", title: "Glasgow Coma Scale (adult)",
+   blurb: "Level of consciousness from eye, verbal and motor responses.",
+   fields: [S("e", "Eye opening", [[4, "4 Spontaneous"], [3, "3 To sound"], [2, "2 To pressure"], [1, "1 None"]], {pts: true}),
+     S("v", "Verbal response", [[5, "5 Oriented"], [4, "4 Confused"], [3, "3 Words only"], [2, "2 Sounds only"], [1, "1 None"]], {pts: true}),
+     S("m", "Motor response", [[6, "6 Obeys commands"], [5, "5 Localises pain"], [4, "4 Normal flexion (withdrawal)"], [3, "3 Abnormal flexion"], [2, "2 Extension"], [1, "1 None"]], {pts: true})],
+   calc(v, c) {
+     const s = sumPts(c, v);
+     const [sev, lvl] = s >= 13 ? ["Mild impairment", "ok"] : s >= 9 ? ["Moderate impairment", "warn"] : ["Severe impairment", "bad"];
+     return {head: {k: "Glasgow Coma Scale", v: s + " / 15 \u2022 E" + v.e + " V" + v.v + " M" + v.m, lvl, sub: sev + (s <= 8 ? ": consider airway protection (GCS 8 or less)" : "")},
+       notes: ["Report the three components, not just the total."],
+       foot: '<p class="cdt-foot">For children under 5 or pre-verbal patients use the <a href="#" onclick="showScreen(\'vitals\');return false">paediatric GCS in Vitals &amp; GCS</a>.</p>'};
+   },
+   how: {inputs: ["Best eye, verbal and motor response observed (use the best motor response of either side)."],
+     formula: ["Total = Eye (1-4) + Verbal (1-5) + Motor (1-6), range 3-15."],
+     interp: ["13-15 mild, 9-12 moderate, 3-8 severe (coma). A fall of 2 or more points, or any new focal sign, needs urgent reassessment."],
+     limits: ["Verbal score cannot be tested in intubated patients (record V as T/NT), and eye opening can be impossible with facial swelling; a total is then unreliable.", "Sedation, intoxication, hypoglycaemia, post-ictal state and language barriers confound the score.", "Poor discrimination in the mid range; always record the individual components and add pupils and focal signs. Paediatric version differs for verbal and motor items."]}},
+
+  /* ---------------------------------------------------------------- Peds dose */
+  {id: "pdose", group: "Dosing & infusions", title: "Paediatric weight-based dose",
+   blurb: "Convert mg/kg to mg and mL per dose with maximum-dose caps.",
+   fields: [KG, N("dose", "Dose (mg/kg)", {min: 0}), S("basis", "Dose is", [["dose", "per dose"], ["day", "per day (divided)"]]), N("n", "Doses per day", {min: 1}), N("maxd", "Maximum single dose (mg, optional)", {min: 0}), N("maxday", "Maximum daily dose (mg, optional)", {min: 0}),
+     N("str", "Liquid strength (mg), optional", {min: 0, hint: "e.g. 125 for 125 mg/5 mL"}), N("per", "...per (mL)", {min: 0, hint: "e.g. 5"})],
+   calc(v) {
+     if (!v.w || !v.dose) return {msg: "Enter weight and dose in mg/kg."};
+     if (v.basis === "day" && !v.n) return {msg: "Enter doses per day for a daily-divided dose."};
+     const n = v.n || 1;
+     let perDose = v.basis === "day" ? v.dose * v.w / n : v.dose * v.w;
+     const calc = perDose, notes = [];
+     if (v.maxd && perDose > v.maxd) { perDose = v.maxd; notes.push("Capped at the maximum single dose of " + tr(v.maxd, 1) + " mg."); }
+     if (v.maxday && perDose * n > v.maxday) { perDose = v.maxday / n; notes.push("Capped so the daily total does not exceed " + tr(v.maxday, 1) + " mg."); }
+     const day = perDose * n, rows = [["Calculated dose before caps", fx(calc, 1) + " mg"], ["Doses per day", String(n)], ["Daily total", fx(day, 1) + " mg (" + fx(day / v.w, 1) + " mg/kg/day)"]];
+     let ml = null;
+     if (v.str && v.per) { ml = perDose / (v.str / v.per); rows.push(["Liquid strength", tr(v.str, 2) + " mg per " + tr(v.per, 2) + " mL"], ["Volume per dose", fx(ml, 1) + " mL"]); }
+     notes.push("Round to a dose that can be measured accurately (oral syringe, whole tablets) and confirm against your formulary.");
+     return {head: {k: "Dose per administration", v: fx(perDose, 1) + " mg" + (ml !== null ? " = " + fx(ml, 1) + " mL" : ""), lvl: notes.length > 1 ? "warn" : "ok", sub: notes.length > 1 ? "A maximum cap was applied" : "Within the entered limits"}, rows, notes,
+       foot: '<p class="cdt-foot">Drug presets, resuscitation doses and fluids: <a href="#" onclick="showScreen(\'dosing\');return false">Paediatric Dosing</a>.</p>'};
+   },
+   how: {inputs: ["Weight (kg), dose in mg/kg and whether it is per dose or per day, doses per day, optional maximum single and daily doses, and optional liquid strength (mg per mL volume)."],
+     formula: ["Per-dose mg = mg/kg \u00d7 weight (if the dose is per day: mg/kg \u00d7 weight \u00f7 doses per day).", "Daily mg = per-dose mg \u00d7 doses per day.", "Volume (mL) = dose mg \u00f7 (strength mg \u00f7 volume mL)."],
+     interp: ["Doses above the maximum are capped at the maximum you enter. Check that the mg/kg/day shown sits inside the licensed range for the drug and indication."],
+     limits: ["The calculator does not know the drug: you must enter the mg/kg dose and maximums from a current reference such as BNFc, local protocol or the product leaflet.", "Neonates, premature infants, renal or hepatic impairment and obesity (use ideal or adjusted weight for some drugs) need specialist dosing.", "Use actual measured weight where possible; length-based tapes or APLS estimates are for emergencies."]}},
+
+  /* ---------------------------------------------------------------- IV maintenance */
+  {id: "maint", group: "Dosing & infusions", title: "IV maintenance fluids & deficit",
+   blurb: "4-2-1 hourly rate, Holliday-Segar daily volume and dehydration deficit.",
+   fields: [KG, N("def", "Dehydration (% body weight, optional)", {min: 0, max: 15}), N("hrs", "Replace deficit over (hours)", {min: 1, hint: "Often 24-48 h"})],
+   calc(v) {
+     if (!v.w) return {msg: "Enter weight in kg."};
+     const w = v.w, hr = w <= 10 ? 4 * w : w <= 20 ? 40 + 2 * (w - 10) : 60 + (w - 20);
+     const day = w <= 10 ? 100 * w : w <= 20 ? 1000 + 50 * (w - 10) : 1500 + 20 * (w - 20);
+     const rows = [["Maintenance per hour (4-2-1)", fx(hr, 1) + " mL/h"], ["Maintenance per day (Holliday-Segar)", fx(day, 0) + " mL/day (" + fx(day / w, 0) + " mL/kg/day)"]];
+     const notes = [];
+     let head = {k: "Maintenance rate", v: fx(hr, 0) + " mL/h", lvl: "info", sub: "About " + fx(day, 0) + " mL/day"};
+     if (hr > 100 || day > 2400) notes.push("Above 100 mL/h or 2400 mL/day: most protocols cap maintenance at these adult-sized limits.");
+     if (v.def) {
+       const def = v.def * w * 10, h = v.hrs || 24, dh = def / h;
+       rows.push(["Estimated fluid deficit", fx(def, 0) + " mL (" + fx(v.def * 10, 0) + " mL/kg)"], ["Deficit replacement rate over " + tr(h, 1) + " h", fx(dh, 1) + " mL/h"], ["Maintenance + deficit", fx(hr + dh, 1) + " mL/h"]);
+       head = {k: "Maintenance + deficit rate", v: fx(hr + dh, 0) + " mL/h", lvl: "info", sub: "Deficit " + fx(def, 0) + " mL over " + tr(h, 1) + " h plus maintenance"};
+       notes.push("Subtract any boluses already given from the deficit; do not count them twice. Severe shock needs resuscitation boluses first, not deficit replacement.");
+       if (v.def > 10) notes.push("Deficits above 10% usually indicate shock or inaccurate estimates; reassess clinically.");
+     }
+     notes.push("Choose fluid type by electrolytes and clinical context. Current guidance (NICE 2015, AAP 2018) favours isotonic fluids with glucose for most hospitalised children; monitor sodium and glucose.");
+     return {head, rows, notes};
+   },
+   how: {inputs: ["Weight in kg. Optionally the estimated dehydration percentage and the time over which to replace it."],
+     formula: ["4-2-1 rule: 4 mL/kg/h for the first 10 kg, + 2 mL/kg/h for the next 10 kg, + 1 mL/kg/h for each kg above 20.", "Holliday-Segar daily volume: 100 mL/kg for the first 10 kg, + 50 mL/kg for the next 10 kg, + 20 mL/kg above 20 kg.", "Deficit (mL) = % dehydration \u00d7 weight (kg) \u00d7 10."],
+     interp: ["The maintenance rate covers normal losses only. Add the deficit and ongoing losses (vomiting, diarrhoea, drains, fever) separately."],
+     limits: ["Not for neonates under 28 days, preterm infants, burns, cardiac, renal or hepatic failure, raised intracranial pressure, DKA or severe malnutrition, which need specific protocols.", "Percent dehydration is a clinical estimate and the 4-2-1 and Holliday-Segar methods differ slightly (960 vs 1000 mL/day at 10 kg).", "Hyponatraemia can result from hypotonic fluids; check electrolytes."]}},
+
+  /* ---------------------------------------------------------------- Drip rate */
+  {id: "drip", group: "Dosing & infusions", title: "Infusion rate & drip rate",
+   blurb: "mL/h for pumps and drops/min for gravity sets.",
+   fields: [N("vol", "Volume to infuse (mL)", {min: 0}), N("hrs", "Time (hours)", {min: 0}), S("df", "Giving set drop factor", [[20, "20 drops/mL (macro)"], [15, "15 drops/mL (macro)"], [10, "10 drops/mL (macro)"], [60, "60 drops/mL (micro/paediatric)"]])],
+   calc(v) {
+     if (!v.vol || !v.hrs) return {msg: "Enter the volume and the time."};
+     const rate = v.vol / v.hrs, dpm = v.vol * Number(v.df) / (v.hrs * 60);
+     return {head: {k: "Pump rate", v: fx(rate, 1) + " mL/h", lvl: "info", sub: "Gravity set: " + fx(dpm, 0) + " drops/min"},
+       rows: [["Pump rate", fx(rate, 1) + " mL/h"], ["Drops per minute", fx(dpm, 1) + " (set " + v.df + " drops/mL)"], ["Seconds per drop", dpm > 0 ? fx(60 / dpm, 1) + " s" : "-"], ["Volume per minute", fx(rate / 60, 2) + " mL"]],
+       notes: ["Check the drop factor printed on the giving set packaging; it varies by manufacturer."]};
+   },
+   how: {inputs: ["Total volume in mL, infusion time in hours, and the drop factor of the giving set."],
+     formula: ["Rate (mL/h) = volume \u00f7 time (h).", "Drops/min = volume (mL) \u00d7 drop factor (drops/mL) \u00f7 time (min)."],
+     interp: ["Round pump rates to the pump's resolution and drip rates to whole drops. Recount drips after any change in patient position or IV height."],
+     limits: ["Gravity drip rates drift with vein condition, height and tubing; use a pump for paediatric, high-risk or time-critical infusions.", "Does not check compatibility, maximum rates, or whether the volume is appropriate for the patient."]}},
+
+  /* ---------------------------------------------------------------- Drug infusion */
+  {id: "drug", group: "Dosing & infusions", title: "Drug infusion (dose to rate)",
+   blurb: "Convert a weight-based dose to a pump rate, or a pump rate back to the dose. Fill in the dose or the rate.",
+   fields: [KG, N("amt", "Drug amount in the bag/syringe (mg)", {min: 0}), N("vol", "Total volume (mL)", {min: 0}),
+     N("dose", "Ordered dose", {min: 0, hint: "Leave blank to convert rate to dose"}), S("du", "Dose unit", [["1", "mcg/kg/min"], ["0.0166667", "mcg/kg/h"], ["16.66667", "mg/kg/h"]]),
+     N("rate", "Pump rate (mL/h)", {min: 0, hint: "Use if no dose entered"})],
+   calc(v) {
+     if (!v.w || !v.amt || !v.vol) return {msg: "Enter weight, drug amount and total volume."};
+     const conc = v.amt * 1000 / v.vol, f = Number(v.du) || 1;   // mcg/mL, factor to mcg/kg/min
+     const unit = {"1": "mcg/kg/min", "0.0166667": "mcg/kg/h", "16.66667": "mg/kg/h"}[v.du] || "mcg/kg/min";
+     const rows = [["Concentration", tr(conc, 2) + " mcg/mL (" + tr(conc / 1000, 4) + " mg/mL)"]], notes = [];
+     let head;
+     if (v.dose) {
+       const dmin = v.dose * f, rate = dmin * v.w * 60 / conc;
+       head = {k: "Pump rate", v: fx(rate, 2) + " mL/h", lvl: "info", sub: "For " + tr(v.dose, 3) + " " + unit + " at " + tr(v.w, 2) + " kg"};
+       rows.push(["Dose in mcg/kg/min", tr(dmin, 3)], ["Drug delivered per hour", tr(dmin * v.w * 60 / 1000, 3) + " mg/h"], ["Time until the bag/syringe runs out", rate > 0 ? fx(v.vol / rate, 1) + " h" : "-"]);
+     } else if (v.rate) {
+       const dmin = v.rate * conc / (60 * v.w), dis = dmin / f;
+       head = {k: "Delivered dose", v: tr(dis, 3) + " " + unit, lvl: "info", sub: "At " + tr(v.rate, 2) + " mL/h, " + tr(v.w, 2) + " kg"};
+       rows.push(["Dose in mcg/kg/min", tr(dmin, 3)], ["Time until the bag/syringe runs out", fx(v.vol / v.rate, 1) + " h"]);
+     } else return {msg: "Enter an ordered dose (to get the rate) or a pump rate (to get the dose)."};
+     notes.push("Have the calculation and the pump programming independently checked for high-risk infusions (inotropes, insulin, heparin, opioids, potassium).");
+     return {head, rows, notes};
+   },
+   how: {inputs: ["Patient weight, total drug amount and final volume of the infusion, then either the ordered dose or the pump rate."],
+     formula: ["Concentration (mcg/mL) = amount (mg) \u00d7 1000 \u00f7 volume (mL).", "Rate (mL/h) = dose (mcg/kg/min) \u00d7 weight (kg) \u00d7 60 \u00f7 concentration (mcg/mL).", "Dose (mcg/kg/min) = rate (mL/h) \u00d7 concentration \u00f7 (60 \u00d7 weight). mcg/kg/h \u00f7 60 and mg/kg/h \u00d7 16.67 convert to mcg/kg/min."],
+     interp: ["Use the final total volume after the drug is added if it changes the volume meaningfully. Check the rate against the pump's limits and the drug's usual range."],
+     limits: ["Does not know drug-specific ranges, compatibility, line dead space or priming volume.", "Weight source matters (actual, ideal or dosing weight differ by drug). Not a substitute for a pharmacy-approved infusion protocol or standard concentrations.", "Mistakes in infusion programming are a leading cause of serious drug errors: use independent double checks and smart pumps where available."]}}
+  ];
+
+  /* ---------- rendering ---------- */
+  const esc2 = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const COL = {ok: "var(--ok)", warn: "var(--amber)", bad: "var(--warn)", info: "var(--accent)"};
+  let cur = null;
+
+  function fieldHtml(c, f) {
+    const id = "cdt_" + c.id + "_" + f.id;
+    if (f.t === "c") return '<label class="cdt-chk"><input type="checkbox" id="' + id + '"><span>' + esc2(f.label) + '</span>' + (f.pts ? '<b class="cdt-pt">' + (f.pts > 0 ? "+" : "") + f.pts + '</b>' : "") + '</label>';
+    const hint = f.hint ? '<div class="cdt-hint">' + esc2(f.hint) + '</div>' : "";
+    if (f.t === "s") return '<div><label for="' + id + '">' + esc2(f.label) + '</label><select id="' + id + '">' + f.options.map(o => '<option value="' + o[0] + '">' + esc2(o[1]) + '</option>').join("") + '</select>' + hint + '</div>';
+    return '<div><label for="' + id + '">' + esc2(f.label) + '</label><input id="' + id + '" type="number" inputmode="decimal" step="any"' + (f.min !== undefined ? ' min="' + f.min + '"' : "") + (f.max !== undefined ? ' max="' + f.max + '"' : "") + '>' + hint + '</div>';
+  }
+  const list = (t, a) => '<b>' + t + '</b><ul class="bl">' + a.map(x => '<li>' + esc2(x) + '</li>').join("") + '</ul>';
+
+  function resultHtml(r) {
+    if (r.msg) return '<div class="cdt-msg">' + esc2(r.msg) + '</div>';
+    let h = "";
+    if (r.head) h += '<div class="cdt-head" style="border-left-color:' + COL[r.head.lvl || "info"] + '"><div class="cdt-hk">' + esc2(r.head.k) + '</div><div class="cdt-hv" style="color:' + COL[r.head.lvl || "info"] + '">' + esc2(r.head.v) + '</div>' + (r.head.sub ? '<div class="cdt-hs">' + esc2(r.head.sub) + '</div>' : "") + '</div>';
+    if (r.rows && r.rows.length) h += '<table><tbody>' + r.rows.map(x => '<tr><td>' + esc2(x[0]) + '</td><td style="font-weight:700">' + esc2(x[1]) + '</td></tr>').join("") + '</tbody></table>';
+    if (r.notes && r.notes.length) h += '<ul class="bl cdt-notes">' + r.notes.map(x => '<li>' + esc2(x) + '</li>').join("") + '</ul>';
+    return h + (r.foot || "");
+  }
+
+  function readValues(c) {
+    const v = {};
+    for (const f of c.fields) {
+      const el = document.getElementById("cdt_" + c.id + "_" + f.id);
+      v[f.id] = f.t === "c" ? el.checked : f.t === "s" ? el.value : num(el.value);
+    }
+    return v;
+  }
+  function run() {
+    if (!cur) return;
+    document.getElementById("cdt_out").innerHTML = resultHtml(cur.calc(readValues(cur), cur));
+  }
+
+  function select(id) {
+    cur = CALCS.find(c => c.id === id) || CALCS[0];
+    document.querySelectorAll("#cdt_nav button").forEach(b => b.classList.toggle("active", b.dataset.id === cur.id));
+    const nums = cur.fields.filter(f => f.t !== "c"), chks = cur.fields.filter(f => f.t === "c");
+    const how = '<details class="xsec green cdt-how" open><summary>How it works: inputs, method, interpretation, limitations</summary><div class="xbody" style="max-height:none">' +
+      list("Inputs", cur.how.inputs) + list("Formula / validated method", cur.how.formula) + list("Interpretation", cur.how.interp) + list("Limitations", cur.how.limits) + '</div></details>';
+    document.getElementById("cdt_panel").innerHTML = '<h3 class="cdt-title">' + esc2(cur.title) + '</h3><p class="cdt-blurb">' + esc2(cur.blurb) + '</p>' +
+      (nums.length ? '<div class="grid">' + nums.map(f => fieldHtml(cur, f)).join("") + '</div>' : "") +
+      (chks.length ? '<div class="cdt-checks">' + chks.map(f => fieldHtml(cur, f)).join("") + '</div>' : "") +
+      '<div class="row" style="margin-top:6px"><button class="go" style="background:transparent;color:var(--accent);border:1px solid var(--accent)" onclick="cdtReset()">Reset</button></div>' +
+      '<div class="out" id="cdt_out"></div>' + how +
+      '<p class="cdt-foot">Clinical decision support only. It does not replace clinical judgement; verify results and local protocols before acting.</p>';
+    run();
+  }
+
+  const nav = document.getElementById("cdt_nav");
+  if (!nav) return;
+  const groups = []; CALCS.forEach(c => { let g = groups.find(x => x.name === c.group); if (!g) groups.push(g = {name: c.group, items: []}); g.items.push(c); });
+  nav.innerHTML = groups.map(g => '<div class="cdt-grp"><div class="cdt-gl">' + esc2(g.name) + '</div>' + g.items.map(c => '<button type="button" data-id="' + c.id + '">' + esc2(c.title) + '</button>').join("") + '</div>').join("");
+  nav.addEventListener("click", e => { const b = e.target.closest("button[data-id]"); if (b) select(b.dataset.id); });
+  const panel = document.getElementById("cdt_panel");
+  panel.addEventListener("input", run); panel.addEventListener("change", run);
+  window.cdtReset = () => select(cur.id);
+  window.cdtOpen = select;
+  select(CALCS[0].id);
+})();
 
 showScreen("home");
 </script>
