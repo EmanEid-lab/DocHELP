@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f8fafc">
+<title>DocHELP | Clinical Pediatric Toolkit</title>
+<meta name="description" content="DocHELP: paediatric dosing, transfusion, drug interaction, vaccination and vitals tools.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%E2%9A%95%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --card-hover: #f1f5f9;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --accent: #0284c7;
+    --accent-light: rgba(2, 132, 199, 0.1);
+    --warn: #e11d48;
+    --ok: #16a34a;
+    --amber: #d97706;
+    --header-bg: rgba(255, 255, 255, 0.85);
+    --pill-brand-bg: rgba(13, 148, 136, 0.15);
+    --pill-brand-fg: #0f766e;
+    --pill-cls-bg: rgba(147, 51, 234, 0.12);
+    --pill-cls-fg: #7e22ce;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+    color-scheme: light;
+  }
+
+  /* Dark: explicit choice */
+  :root[data-theme="dark"] {
+      --bg: #0b0f17;
+      --card: #131b26;
+      --card-hover: #1b2636;
+      --ink: #f1f5f9;
+      --muted: #94a3b8;
+      --line: #263445;
+      --accent: #38bdf8;
+      --accent-light: rgba(56, 189, 248, 0.14);
+      --warn: #fb7185;
+      --ok: #4ade80;
+      --amber: #fbbf24;
+      --header-bg: rgba(19, 27, 38, 0.85);
+      --pill-brand-bg: rgba(45, 212, 191, 0.16);
+      --pill-brand-fg: #5eead4;
+      --pill-cls-bg: rgba(192, 132, 252, 0.16);
+      --pill-cls-fg: #d8b4fe;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+      color-scheme: dark;
+  }
+
+  /* Dark: follow the system when the user has not chosen */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]):not([data-theme="dark"]) {
+        --bg: #0b0f17;
+        --card: #131b26;
+        --card-hover: #1b2636;
+        --ink: #f1f5f9;
+        --muted: #94a3b8;
+        --line: #263445;
+        --accent: #38bdf8;
+        --accent-light: rgba(56, 189, 248, 0.14);
+        --warn: #fb7185;
+        --ok: #4ade80;
+        --amber: #fbbf24;
+        --header-bg: rgba(19, 27, 38, 0.85);
+        --pill-brand-bg: rgba(45, 212, 191, 0.16);
+        --pill-brand-fg: #5eead4;
+        --pill-cls-bg: rgba(192, 132, 252, 0.16);
+        --pill-cls-fg: #d8b4fe;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.35);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        color-scheme: dark;
+    }
+  }
+
+  * { box-sizing: border-box; transition: background-color 0.2s ease, border-color 0.2s ease; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  /* Header */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--line);
+    padding: 12px clamp(16px, 3vw, 48px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .brand-group { display: flex; align-items: center; gap: 14px; }
+  .logo-icon {
+    font-size: 26px;
+    background: var(--accent-light);
+    color: var(--accent);
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+  }
+  header h1 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -0.02em; }
+  header p { margin: 0; font-size: 12px; color: var(--muted); }
+
+  /* Header controls */
+  .hdr-controls { display: flex; align-items: center; gap: 10px; }
+  .theme-toggle {
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+  }
+  .theme-toggle:hover { background: var(--card-hover); }
+
+  .back-btn {
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--accent);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .back-btn:hover { background: var(--card-hover); }
+
+  /* Main Container */
+  .container { max-width: 1260px; margin: 0 auto; padding: 24px 20px 48px; }
+
+  /* Home Screen Styles */
+  .hero {
+    background: linear-gradient(135deg, var(--card) 0%, var(--card-hover) 100%);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 32px 28px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .hero-text h2 { margin: 0 0 6px; font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
+  .hero-text p { margin: 0; color: var(--muted); font-size: 15px; max-width: 760px; }
+  .status-badge {
+    background: color-mix(in srgb, var(--ok) 14%, transparent);
+    color: var(--ok);
+    font-weight: 600;
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .status-badge::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ok);
+  }
+
+  /* Tools Grid */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  .tool-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+  }
+  .tool-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--card-border);
+  }
+  .tool-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--card-border, var(--accent));
+  }
+  .tool-card.dosing { --card-border: #0284c7; }
+  .tool-card.transfusion { --card-border: #e11d48; }
+  .tool-card.interactions { --card-border: #9333ea; }
+  .tool-card.vaccines { --card-border: #0d9488; }
+
+  .tool-icon {
+    font-size: 32px;
+    width: 54px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: var(--bg);
+  }
+  .tool-title { font-size: 18px; font-weight: 700; margin: 0; }
+  .tool-desc { font-size: 13px; color: var(--muted); margin: 6px 0 0; line-height: 1.45; }
+  .tool-cta {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  /* Contact & Owner Section */
+  .contact-section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+  .contact-meta { display: flex; gap: 10px; flex-wrap: wrap; }
+  .meta-tag {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Panels & Tools Components */
+  nav { display: flex; gap: 6px; padding: 12px 0 0; flex-wrap: wrap; }
+  nav button {
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    padding: 8px 16px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  nav button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .panel { display: none; background: var(--card); border: 1px solid var(--line); border-radius: 0 10px 10px 10px; padding: 22px; box-shadow: var(--shadow); }
+  .panel.active { display: block; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 22px; margin-top: 14px; box-shadow: var(--shadow); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 16px; }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+  input, select, textarea {
+    width: 100%;
+    padding: 9px 12px;
+    font-size: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--ink);
+  }
+  button.go {
+    background: var(--accent);
+    color: #fff;
+    border: 0;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button.go:hover { opacity: 0.92; }
+  .out { margin-top: 18px; border-top: 1px dashed var(--line); padding-top: 16px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  td, th { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; background: var(--bg); text-transform: uppercase; }
+  .warn { color: var(--warn); font-weight: 600; }
+  .ok { color: var(--ok); }
+  .row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+  code { background: var(--bg); padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+
+  /* Bullets */
+  ul.bl { list-style: disc; margin: 0; padding-left: 20px; line-height: 1.7; font-size: 14.5px; }
+  ul.bl li { margin: 4px 0; }
+  ul.bl .k { font-weight: 600; }
+  ul.bl .v { font-weight: 700; }
+  ul.note {
+    list-style: disc;
+    margin: 14px 0 0;
+    padding: 10px 14px 10px 28px;
+    background: var(--accent-light);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .chip { display: inline-block; padding: 4px 12px; margin: 3px 6px 3px 0; border-radius: 999px; background: var(--accent-light); color: var(--accent); font-weight: 600; font-size: 12px; text-decoration: none; border: 1px solid var(--accent); }
+  .pill { display: inline-block; padding: 3px 10px; margin: 2px 4px 2px 0; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .pill.brand { background: var(--pill-brand-bg); color: var(--pill-brand-fg); }
+  .pill.cls { background: var(--pill-cls-bg); color: var(--pill-cls-fg); }
+  .xsec { border: 1px solid var(--line); border-left: 5px solid var(--xc); border-radius: 8px; margin-top: 12px; background: var(--bg); }
+  .xsec > summary { cursor: pointer; padding: 10px 14px; font-weight: 700; color: var(--xc); }
+  .xsec .xbody { padding: 0 14px 12px; max-height: 420px; overflow: auto; }
+  .xsec.red { --xc: var(--warn); }
+  .xsec.amber { --xc: var(--amber); }
+  .xsec.green { --xc: var(--ok); }
+  mark.hr { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); font-weight: 700; padding: 0 4px; border-radius: 4px; }
+  mark.ho { background: color-mix(in srgb, var(--amber) 20%, transparent); color: var(--amber); font-weight: 700; padding: 0 4px; border-radius: 4px; }
+  .screen[hidden] { display: none !important; }
+
+  /* ---- Added: polish, a11y, bug fixes ---- */
+  input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.7; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  ul.bl li.bad { color: var(--warn); font-weight: 600; }
+  ul.bl li.good { color: var(--ok); }
+
+  .screen:not([hidden]) { animation: fadeUp 0.25s ease both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+  .hero-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .hero-chip { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--bg); border: 1px solid var(--line); padding: 4px 10px; border-radius: 999px; }
+
+  .section-title { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+
+  .tool-icon { background: color-mix(in srgb, var(--card-border, var(--accent)) 14%, transparent) !important; }
+  .tool-card { transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background-color 0.2s ease; }
+  .tool-cta span { display: inline-block; transition: transform 0.18s ease; }
+  .tool-card:hover .tool-cta span { transform: translateX(4px); }
+  .tool-card .tool-cta { color: var(--card-border, var(--accent)); }
+  .tool-card.dosing { --card-border: #0ea5e9; }
+  .tool-card.transfusion { --card-border: #f43f5e; }
+  .tool-card.interactions { --card-border: #a855f7; }
+  .tool-card.vaccines { --card-border: #14b8a6; }
+
+  .disclaimer { margin: 20px 4px 0; font-size: 12px; color: var(--muted); text-align: center; line-height: 1.6; }
+
+  @media (max-width: 600px) {
+    header { padding: 10px 14px; }
+    header p { display: none; }
+    .logo-icon { width: 38px; height: 38px; font-size: 22px; }
+    .container { padding: 16px 14px 40px; }
+    .hero { padding: 22px 18px; }
+    .hero-text h2 { font-size: 22px; }
+    .theme-toggle #themeLabel { display: none; }
+    .contact-section { padding: 18px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+
+  /* ---- Vitals & GCS tool ---- */
+  .tool-card.vitals { --card-border: #f59e0b; }
+  .vpanel { display: none; background: var(--card); border: 1px solid var(--line); border-radius: 0 10px 10px 10px; padding: 22px; box-shadow: var(--shadow); }
+  .vpanel.active { display: block; }
+  tr.hl td { background: var(--accent-light); font-weight: 700; }
+  .score-big { font-size: 40px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+  .score-big small { font-size: 15px; font-weight: 600; color: var(--muted); margin-left: 4px; }
+  .age-row { display: flex; gap: 8px; }
+  .age-row input { flex: 1; min-width: 0; }
+  .age-row select { width: 96px; }
+
+  /* ---- Sidebar ---- */
+  .app-shell { display: flex; align-items: flex-start; }
+  .content { flex: 1; min-width: 0; }
+  #sidebar {
+    width: 260px; flex: none;
+    position: sticky; top: var(--header-h, 69px);
+    height: calc(100vh - var(--header-h, 69px));
+    overflow-y: auto;
+    background: var(--card);
+    border-right: 1px solid var(--line);
+    padding: 16px 12px 24px;
+    transition: margin-left 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+  }
+  body.sb-collapsed #sidebar { margin-left: -260px; }
+  .sb-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 14px 12px 6px; }
+  .sb-label:first-child { margin-top: 2px; }
+  .sb-item {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 9px 10px; margin: 2px 0;
+    border: none; background: none; color: var(--ink);
+    font: inherit; font-size: 14px; font-weight: 600; text-align: left;
+    border-radius: 10px; cursor: pointer; position: relative;
+  }
+  .sb-item:hover { background: var(--card-hover); }
+  .sb-item.active { background: var(--accent-light); color: var(--accent); }
+  .sb-item.active::before { content: ""; position: absolute; left: -12px; top: 8px; bottom: 8px; width: 4px; border-radius: 0 4px 4px 0; background: var(--accent); }
+  .sb-ico { width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; background: var(--bg); font-size: 16px; flex: none; }
+  .sb-item.active .sb-ico { background: var(--card); }
+  .sb-subs { display: none; margin: 0 0 6px 20px; padding-left: 18px; border-left: 1px solid var(--line); }
+  .sb-subs.open { display: block; }
+  .sb-sub {
+    display: block; width: 100%; text-align: left;
+    padding: 6px 10px; margin: 1px 0;
+    border: none; background: none; color: var(--muted);
+    font: inherit; font-size: 13px; font-weight: 500; border-radius: 8px; cursor: pointer;
+  }
+  .sb-sub:hover { background: var(--card-hover); color: var(--ink); }
+  .sb-sub.active { color: var(--accent); font-weight: 700; background: var(--accent-light); }
+  .menu-btn {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    width: 40px; height: 40px; border-radius: 10px; cursor: pointer; font-size: 18px; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+  }
+  .menu-btn:hover { background: var(--card-hover); }
+  #sbOverlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); z-index: 150; }
+  @media (max-width: 900px) {
+    #sidebar {
+      position: fixed; top: 0; left: 0; height: 100vh; z-index: 200;
+      transform: translateX(-100%); margin-left: 0 !important;
+      box-shadow: var(--shadow-lg); padding-top: 20px;
+    }
+    body.sb-open #sidebar { transform: none; }
+    body.sb-open #sbOverlay { display: block; }
+  }
+</style>
+</head>
+<body>
+
+<header id="topHeader">
+  <div class="brand-group">
+    <button id="menuBtn" class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu" aria-controls="sidebar">&#9776;</button>
+    <button id="backBtn" class="back-btn" onclick="showScreen('home')" hidden>&#8592; Home</button>
+    <div class="logo-icon">&#9877;&#65039;</div>
+    <div>
+      <h1 id="hTitle">DocHELP</h1>
+      <p id="hSub">Pediatric & Clinical Decision Support Toolkit</p>
+    </div>
+  </div>
+  <div class="hdr-controls">
+    <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()" title="Switch dark/light mode">
+      <span id="themeIcon">&#127769;</span>
+      <span id="themeLabel">Theme</span>
+    </button>
+  </div>
+</header>
+
+<div class="app-shell">
+<aside id="sidebar" aria-label="Tools menu">
+  <div class="sb-label">Navigate</div>
+  <button class="sb-item" data-screen="home" onclick="goScreen('home')"><span class="sb-ico">&#127968;</span>Home</button>
+
+  <div class="sb-label">Tools</div>
+  <button class="sb-item" data-screen="dosing" onclick="goScreen('dosing')"><span class="sb-ico">&#128138;</span>Paediatric Dosing</button>
+  <div class="sb-subs" data-screen="dosing">
+    <button class="sb-sub" data-screen="dosing" data-tab="drug" onclick="goTab('dosing','drug')">Drug dose</button>
+    <button class="sb-sub" data-screen="dosing" data-tab="formula" onclick="goTab('dosing','formula')">Custom formula</button>
+    <button class="sb-sub" data-screen="dosing" data-tab="emerg" onclick="goTab('dosing','emerg')">Emergency / resus</button>
+    <button class="sb-sub" data-screen="dosing" data-tab="fluids" onclick="goTab('dosing','fluids')">Fluids</button>
+    <button class="sb-sub" data-screen="dosing" data-tab="body" onclick="goTab('dosing','body')">Weight / BSA / eGFR</button>
+  </div>
+
+  <button class="sb-item" data-screen="transfusion" onclick="goScreen('transfusion')"><span class="sb-ico">&#129656;</span>Transfusion Guide</button>
+  <button class="sb-item" data-screen="interactions" onclick="goScreen('interactions')"><span class="sb-ico">&#9879;&#65039;</span>Drug Interactions</button>
+  <button class="sb-item" data-screen="vaccines" onclick="goScreen('vaccines')"><span class="sb-ico">&#128137;</span>Egyptian Immunization</button>
+
+  <button class="sb-item" data-screen="vitals" onclick="goScreen('vitals')"><span class="sb-ico">&#129658;</span>Vitals &amp; GCS</button>
+  <div class="sb-subs" data-screen="vitals">
+    <button class="sb-sub" data-screen="vitals" data-tab="vitals" onclick="goTab('vitals','vitals')">Vital signs check</button>
+    <button class="sb-sub" data-screen="vitals" data-tab="gcs" onclick="goTab('vitals','gcs')">Paediatric GCS</button>
+  </div>
+</aside>
+<div id="sbOverlay" onclick="closeSidebarMobile()"></div>
+<div class="content">
+<div class="container">
+
+<!-- HOME SCREEN -->
+<section id="screen-home" class="screen">
+
+  <div class="hero">
+    <div class="hero-text">
+      <div class="eyebrow" id="greet">Welcome</div>
+      <h2>DocHELP Clinical Toolkit</h2>
+      <p>Instant clinical calculations, resuscitation reference, FDA interaction cross-checking, and routine vaccination guidelines.</p>
+      <div class="hero-chips">
+        <span class="hero-chip">&#9889; Fast, weight-based</span>
+        <span class="hero-chip">&#127760; Live openFDA data</span>
+        <span class="hero-chip">&#128241; Mobile friendly</span>
+      </div>
+    </div>
+    <div>
+      <span class="status-badge">Ready for Clinical Use</span>
+    </div>
+  </div>
+
+  <!-- Bento Grid Tools -->
+  <h3 class="section-title">Tools</h3>
+  <div class="tools-grid">
+    <div class="tool-card dosing" role="button" tabindex="0" onclick="showScreen('dosing')">
+      <div>
+        <div class="tool-icon">&#128138;</div>
+        <h3 class="tool-title">Paediatric Dosing</h3>
+        <p class="tool-desc">Weight-based mg/kg calculators, resus/APLS drugs, custom formulas, maintenance fluids (4-2-1), BSA and eGFR.</p>
+      </div>
+      <span class="tool-cta">Open Calculator <span>&#8594;</span></span>
+    </div>
+
+    <div class="tool-card transfusion" role="button" tabindex="0" onclick="showScreen('transfusion')">
+      <div>
+        <div class="tool-icon">&#129656;</div>
+        <h3 class="tool-title">Transfusion Guide</h3>
+        <p class="tool-desc">Packed Red Blood Cells (PRBC) with target Hb titration, Platelets, FFP, and Cryoprecipitate rates.</p>
+      </div>
+      <span class="tool-cta">Calculate Transfusion <span>&#8594;</span></span>
+    </div>
+
+    <div class="tool-card interactions" role="button" tabindex="0" onclick="showScreen('interactions')">
+      <div>
+        <div class="tool-icon">&#9879;&#65039;</div>
+        <h3 class="tool-title">Drug Interactions</h3>
+        <p class="tool-desc">Live openFDA label scanner highlighting contraindications, boxed warnings, and severity-graded interactions.</p>
+      </div>
+      <span class="tool-cta">Lookup Drug <span>&#8594;</span></span>
+    </div>
+
+    <div class="tool-card vaccines" role="button" tabindex="0" onclick="showScreen('vaccines')">
+      <div>
+        <div class="tool-icon">&#128137;</div>
+        <h3 class="tool-title">Egyptian Immunization</h3>
+        <p class="tool-desc">Official Egyptian MOHP mandatory childhood schedule from birth to school entry with age milestone filters.</p>
+      </div>
+      <span class="tool-cta">View Timetable <span>&#8594;</span></span>
+    </div>
+
+    <div class="tool-card vitals" role="button" tabindex="0" onclick="showScreen('vitals')">
+      <div>
+        <div class="tool-icon">&#129658;</div>
+        <h3 class="tool-title">Vitals &amp; GCS</h3>
+        <p class="tool-desc">Age-based normal ranges for HR, RR, BP and SpO2 with abnormal-value flags, plus the paediatric Glasgow Coma Scale.</p>
+      </div>
+      <span class="tool-cta">Check Vitals <span>&#8594;</span></span>
+    </div>
+  </div>
+
+  <!-- Contact Us Card -->
+  <div class="contact-section">
+    <div>
+      <h3 style="margin:0 0 6px; font-size:16px; font-weight:700;">Clinical Feedback & Contact</h3>
+      <p style="margin:0; font-size:13px; color:var(--muted);">For guideline updates, feedback, or inquiries regarding DocHELP.</p>
+    </div>
+    <div class="contact-meta">
+      <div class="meta-tag"><strong>Owner:</strong> Dr. Eman Eid</div>
+      <div class="meta-tag">
+        <strong>Email:</strong>
+        <a href="mailto:EmanEid228@gmail.com" style="color:var(--accent); text-decoration:none;">EmanEid228@gmail.com</a>
+      </div>
+    </div>
+  </div>
+
+  <p class="disclaimer">DocHELP is a decision-support aid and does not replace clinical judgement.<br>Always verify doses against your local protocols and current formulary.</p>
+
+</section>
+
+<!-- DOSING SCREEN -->
+<div id="screen-dosing" class="screen" hidden>
+  <nav id="tabs">
+    <button class="active" data-t="drug">Drug dose</button>
+    <button data-t="formula">Custom formula</button>
+    <button data-t="emerg">Emergency / resus</button>
+    <button data-t="fluids">Fluids</button>
+    <button data-t="body">Weight / BSA / eGFR</button>
+  </nav>
+
+  <main>
+    <section class="panel active" id="drug">
+      <div class="grid">
+        <div><label>Preset</label>
+          <select id="d_preset" onchange="applyPreset()">
+            <option value="">-- manual entry --</option>
+            <option value="para">Paracetamol (oral)</option>
+            <option value="ibu">Ibuprofen (oral)</option>
+            <option value="amox">Amoxicillin (oral, mg/kg/day split)</option>
+          </select></div>
+        <div><label>Weight (kg)</label><input id="d_w" type="number" step="0.01" value="10"></div>
+        <div><label>Dose (per kg)</label><input id="d_dpk" type="number" step="0.01" value="15"></div>
+        <div><label>Dose basis</label>
+          <select id="d_basis"><option value="dose">per dose</option><option value="day">per day (divided)</option></select></div>
+        <div><label>Doses per day</label><input id="d_n" type="number" step="1" value="4"></div>
+        <div><label>Max single dose (mg)</label><input id="d_maxd" type="number" step="any" value="1000"></div>
+        <div><label>Max daily dose (mg)</label><input id="d_maxday" type="number" step="any" value="4000"></div>
+        <div><label>Concentration (mg/mL)</label><input id="d_conc" type="number" step="any" value="24"></div>
+      </div>
+      <button class="go" onclick="calcDrug()">Calculate</button>
+      <div class="out" id="d_out"></div>
+      <ul class="note">
+        <li>Presets are editable starting points only (beyond neonatal period).</li>
+        <li>Always confirm age band, organ function, and current hospital formulary.</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="formula">
+      <div class="grid">
+        <div><label>Weight w (kg)</label><input id="f_w" type="number" step="0.01" value="12"></div>
+        <div><label>Age a (years)</label><input id="f_a" type="number" step="0.01" value="3"></div>
+        <div><label>Height h (cm)</label><input id="f_h" type="number" step="0.1" value="95"></div>
+      </div>
+      <label>Formula (use w, a, h; min, max, sqrt, pow)</label>
+      <div class="row">
+        <textarea id="f_expr" rows="3" style="flex:1;min-width:260px;font-family:ui-monospace,Menlo,monospace">min(w*15, 1000)
+w*0.01
+(a+4)*2</textarea>
+        <input id="f_unit" value="mg" style="width:90px" title="unit label">
+        <button class="go" onclick="calcFormula()">Evaluate</button>
+      </div>
+      <div class="out" id="f_out"></div>
+    </section>
+
+    <section class="panel" id="emerg">
+      <div class="grid">
+        <div><label>Weight (kg)</label><input id="e_w" type="number" step="0.01" value="10"></div>
+        <div><label>Age (years)</label><input id="e_a" type="number" step="0.01" value="2"></div>
+      </div>
+      <button class="go" onclick="calcEmerg()">Calculate</button>
+      <div class="out" id="e_out"></div>
+    </section>
+
+    <section class="panel" id="fluids">
+      <div class="grid">
+        <div><label>Weight (kg)</label><input id="fl_w" type="number" step="0.01" value="10"></div>
+        <div><label>Bolus (mL/kg)</label><input id="fl_b" type="number" step="1" value="10"></div>
+        <div><label>Dehydration (%)</label><input id="fl_d" type="number" step="1" value="5"></div>
+        <div><label>Replace deficit over (h)</label><input id="fl_t" type="number" step="1" value="24"></div>
+      </div>
+      <button class="go" onclick="calcFluids()">Calculate</button>
+      <div class="out" id="fl_out"></div>
+    </section>
+
+    <section class="panel" id="body">
+      <div class="grid">
+        <div><label>Age (years)</label><input id="b_a" type="number" step="0.01" value="4"></div>
+        <div><label>Weight (kg)</label><input id="b_w" type="number" step="0.01" value="16"></div>
+        <div><label>Height (cm)</label><input id="b_h" type="number" step="0.1" value="102"></div>
+        <div><label>Serum creatinine (mg/dL)</label><input id="b_cr" type="number" step="0.01" value="0.4"></div>
+      </div>
+      <button class="go" onclick="calcBody()">Calculate</button>
+      <div class="out" id="b_out"></div>
+    </section>
+  </main>
+</div>
+
+<!-- TRANSFUSION SCREEN -->
+<div id="screen-transfusion" class="screen" hidden>
+  <div class="card">
+    <div class="grid">
+      <div><label>Product</label>
+        <select id="t_prod" onchange="applyProduct()">
+          <option value="prbc">Packed red cells (PRBC)</option>
+          <option value="plt">Platelets</option>
+          <option value="ffp">Fresh frozen plasma</option>
+          <option value="cryo">Cryoprecipitate</option>
+        </select></div>
+      <div><label>Weight (kg)</label><input id="t_w" type="number" step="0.01" value="10"></div>
+      <div id="t_hbbox"><label>Current Hb (g/dL)</label><input id="t_hb" type="number" step="0.1" value="6"></div>
+      <div id="t_tgbox"><label>Target Hb (g/dL)</label><input id="t_tg" type="number" step="0.1" value="9"></div>
+      <div id="t_rbox"><label>Rise per mL/kg</label><input id="t_rise" type="number" step="0.01" value="0.25"></div>
+      <div id="t_dbox" style="display:none"><label>Dose (mL/kg)</label><input id="t_dose" type="number" step="0.1" value="10"></div>
+      <div><label>Infuse over (hours)</label><input id="t_hrs" type="number" step="0.5" value="4"></div>
+    </div>
+    <button class="go" onclick="calcTransfusion()">Calculate</button>
+    <div class="out" id="t_out"></div>
+  </div>
+</div>
+
+<!-- DRUG INTERACTIONS SCREEN -->
+<div id="screen-interactions" class="screen" hidden>
+  <div class="card">
+    <label>Drug name (generic or brand)</label>
+    <div class="row">
+      <input id="x_name" type="text" placeholder="e.g. ibuprofen, warfarin, augmentin" autocomplete="off"
+             style="flex:1;min-width:240px" onkeydown="if(event.key==='Enter')lookupDrug()">
+      <button class="go" id="x_btn" onclick="lookupDrug()">Search</button>
+    </div>
+    <div style="margin-top:10px"><span style="font-size:13px; color:var(--muted)">Quick examples:</span>
+      <a class="chip" href="#" onclick="quickDrug('ibuprofen');return false">ibuprofen</a>
+      <a class="chip" href="#" onclick="quickDrug('amoxicillin');return false">amoxicillin</a>
+      <a class="chip" href="#" onclick="quickDrug('warfarin');return false">warfarin</a>
+      <a class="chip" href="#" onclick="quickDrug('ciprofloxacin');return false">ciprofloxacin</a>
+    </div>
+    <div class="out" id="x_out"></div>
+  </div>
+</div>
+
+<!-- VACCINES SCREEN -->
+<div id="screen-vaccines" class="screen" hidden>
+  <div class="card">
+    <h3 style="margin-top:0; color:var(--accent);">Egyptian Ministry of Health Routine Childhood Schedule</h3>
+    <div class="grid">
+      <div>
+        <label>Filter by Age Milestone</label>
+        <select id="vax_filter_age" onchange="filterVaccines()">
+          <option value="all">All Ages (Birth to School Age)</option>
+          <option value="At Birth">At Birth</option>
+          <option value="2 Months">2 Months (First Dose)</option>
+          <option value="4 Months">4 Months (Second Dose)</option>
+          <option value="6 Months">6 Months (Third Dose)</option>
+          <option value="9 Months">9 Months</option>
+          <option value="12 Months">12 Months (1 Year)</option>
+          <option value="18 Months">18 Months (Booster)</option>
+          <option value="School Age (4-6 Years)">School Age (4-6 Years)</option>
+        </select>
+      </div>
+      <div>
+        <label>Filter by Vaccine</label>
+        <select id="vax_filter_name" onchange="filterVaccines()">
+          <option value="all">All Vaccines</option>
+          <option value="BCG">BCG Vaccine</option>
+          <option value="Hepatitis B">Hepatitis B</option>
+          <option value="Hexavalent / Pentavalent">Hexavalent / Pentavalent</option>
+          <option value="Polio">Polio (IPV / OPV)</option>
+          <option value="MMR">MMR (Measles, Mumps, Rubella)</option>
+          <option value="Chickenpox">Chickenpox (Varicella)</option>
+          <option value="DTwP">DTwP / DTaP / DT</option>
+          <option value="Hepatitis A">Hepatitis A</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="out" style="border-top:none; padding-top:0; overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Milestone</th>
+            <th>Vaccine</th>
+            <th>Protection / Details</th>
+            <th>Route</th>
+          </tr>
+        </thead>
+        <tbody id="vax_table_body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- VITALS & GCS SCREEN -->
+<div id="screen-vitals" class="screen" hidden>
+  <nav id="vtabs">
+    <button class="active" data-v="vitals" onclick="setVTab('vitals')">Vital signs check</button>
+    <button data-v="gcs" onclick="setVTab('gcs')">Paediatric GCS</button>
+  </nav>
+
+  <div class="vpanel active" id="v_vitals">
+    <div class="grid">
+      <div><label for="vt_age">Age</label>
+        <div class="age-row">
+          <input id="vt_age" type="number" step="0.1" min="0" inputmode="decimal" value="2" oninput="calcVitals()">
+          <select id="vt_unit" onchange="calcVitals()"><option value="y">years</option><option value="m">months</option></select>
+        </div></div>
+      <div><label for="vt_hr">Heart rate (beats/min)</label><input id="vt_hr" type="number" step="1" min="0" inputmode="numeric" oninput="calcVitals()"></div>
+      <div><label for="vt_rr">Resp. rate (breaths/min)</label><input id="vt_rr" type="number" step="1" min="0" inputmode="numeric" oninput="calcVitals()"></div>
+      <div><label for="vt_sbp">Systolic BP (mmHg)</label><input id="vt_sbp" type="number" step="1" min="0" inputmode="numeric" oninput="calcVitals()"></div>
+      <div><label for="vt_spo2">SpO2 (%)</label><input id="vt_spo2" type="number" step="1" min="0" max="100" inputmode="numeric" oninput="calcVitals()"></div>
+    </div>
+    <div class="out" id="vt_out"></div>
+    <ul class="note">
+      <li>Ranges follow APLS reference values for awake, calm children. Fever, crying, pain and sleep all shift normal values, so interpret in context.</li>
+      <li>Not valid for neonates (under 1 month). Always check against your local protocols.</li>
+    </ul>
+  </div>
+
+  <div class="vpanel" id="v_gcs">
+    <div class="grid">
+      <div><label for="g_e">Eye opening</label>
+        <select id="g_e" onchange="calcGCS()">
+          <option value="">Select...</option>
+          <option value="4">4 - Spontaneous</option>
+          <option value="3">3 - To voice / sound</option>
+          <option value="2">2 - To pain</option>
+          <option value="1">1 - None</option>
+        </select></div>
+      <div><label for="g_v">Verbal response</label>
+        <select id="g_v" onchange="calcGCS()">
+          <option value="">Select...</option>
+          <option value="5">5 - Oriented / coos, babbles, smiles</option>
+          <option value="4">4 - Confused / consolable cry</option>
+          <option value="3">3 - Inappropriate words / inconsistently consolable, moaning</option>
+          <option value="2">2 - Incomprehensible sounds / inconsolable, restless</option>
+          <option value="1">1 - None</option>
+        </select></div>
+      <div><label for="g_m">Motor response</label>
+        <select id="g_m" onchange="calcGCS()">
+          <option value="">Select...</option>
+          <option value="6">6 - Obeys commands / normal spontaneous movement</option>
+          <option value="5">5 - Localises pain / withdraws to touch</option>
+          <option value="4">4 - Withdraws from pain</option>
+          <option value="3">3 - Abnormal flexion (decorticate)</option>
+          <option value="2">2 - Abnormal extension (decerebrate)</option>
+          <option value="1">1 - None</option>
+        </select></div>
+    </div>
+    <div class="out" id="g_out"></div>
+    <ul class="note">
+      <li>Uses the paediatric modification of the Glasgow Coma Scale (verbal and motor wording for pre-verbal children).</li>
+      <li>Score the best response observed, and repeat regularly to track trends.</li>
+    </ul>
+  </div>
+</div>
+
+</div><!-- /container -->
+</div><!-- /content -->
+</div><!-- /app-shell -->
+
+<script>
+const $ = id => document.getElementById(id);
+const v = id => parseFloat($(id).value);
+const r = (x, d=2) => (isFinite(x) ? Number(x.toFixed(d)) : "-");
+
+/* Theme Switcher */
+const darkMQ = window.matchMedia("(prefers-color-scheme: dark)");
+
+function initTheme() {
+  applyTheme(localStorage.getItem("dochelp_theme") || "auto");
+}
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === "dark" || theme === "light") root.setAttribute("data-theme", theme);
+  else root.removeAttribute("data-theme");
+  const isDark = theme === "dark" || (theme === "auto" && darkMQ.matches);
+  $("themeIcon").textContent = isDark ? "☀️" : "🌙";
+  $("themeLabel").textContent = isDark ? "Light" : "Dark";
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = isDark ? "#0b0f17" : "#f8fafc";
+}
+
+function toggleTheme() {
+  const attr = document.documentElement.getAttribute("data-theme");
+  const isDark = attr === "dark" || (!attr && darkMQ.matches);
+  const next = isDark ? "light" : "dark";
+  localStorage.setItem("dochelp_theme", next);
+  applyTheme(next);
+}
+
+// follow OS changes while the user hasn't picked a theme manually
+darkMQ.addEventListener("change", () => {
+  if (!localStorage.getItem("dochelp_theme")) applyTheme("auto");
+});
+
+initTheme();
+
+/* Screen Routing */
+const SCREENS = {
+  home: ["DocHELP", "Pediatric & Clinical Decision Support Toolkit"],
+  dosing: ["Paediatric Dosing Calculator", "Weight-based dosing, emergency drugs, fluids, BSA, and custom formulas"],
+  transfusion: ["Transfusion Calculator", "Component volumes and infusion rates by weight"],
+  interactions: ["Drug Interactions", "Interactions and contraindications from FDA drug labels"],
+  vaccines: ["Egyptian Vaccination Schedule", "Official MOHP routine childhood immunization timetable"],
+  vitals: ["Vitals & GCS", "Age-based vital sign ranges and paediatric Glasgow Coma Scale"]
+};
+
+let currentScreen = "home";
+function showScreen(name) {
+  Object.keys(SCREENS).forEach(k => { $("screen-"+k).hidden = (k !== name); });
+  $("hTitle").textContent = SCREENS[name][0];
+  $("hSub").textContent = SCREENS[name][1];
+  $("backBtn").hidden = (name === "home");
+  currentScreen = name;
+  updateSidebar();
+  window.scrollTo(0, 0);
+}
+
+/* Tabs */
+function setTab(t) {
+  document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("active", x.dataset.t === t));
+  document.querySelectorAll(".panel").forEach(x => x.classList.toggle("active", x.id === t));
+  updateSidebar();
+}
+document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => setTab(b.dataset.t));
+
+/* Greeting */
+(function () {
+  const h = new Date().getHours();
+  $("greet").textContent = h < 12 ? "Good morning, Doctor" : h < 18 ? "Good afternoon, Doctor" : "Good evening, Doctor";
+})();
+
+/* Keyboard access for card-style buttons */
+document.querySelectorAll(".tool-card").forEach(el => el.addEventListener("keydown", e => {
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); el.click(); }
+}));
+
+const bl = items => '<ul class="bl">' + items.map(i =>
+  '<li class="'+(i[2]||"")+'"><span class="k">'+i[0]+':</span> <span class="v">'+i[1]+'</span></li>').join("") + '</ul>';
+
+/* Calculators */
+const PRESETS = {
+  para: {dpk:15, basis:"dose", n:4, maxd:1000, maxday:4000, conc:24},
+  ibu:  {dpk:10, basis:"dose", n:3, maxd:400,  maxday:1200, conc:20},
+  amox: {dpk:40, basis:"day",  n:3, maxd:1000, maxday:3000, conc:25}
+};
+function applyPreset() {
+  const p = PRESETS[$("d_preset").value]; if (!p) return;
+  $("d_dpk").value=p.dpk; $("d_basis").value=p.basis; $("d_n").value=p.n;
+  $("d_maxd").value=p.maxd; $("d_maxday").value=p.maxday; $("d_conc").value=p.conc;
+}
+
+function calcDrug() {
+  const w=v("d_w"), dpk=v("d_dpk"), n=v("d_n"), maxd=v("d_maxd"), maxday=v("d_maxday"), conc=v("d_conc");
+  const basis=$("d_basis").value;
+  if (!(w>0 && dpk>0 && n>0)) { $("d_out").innerHTML='<span class="warn">Enter valid weight, dose and frequency.</span>'; return; }
+  let single = basis==="dose" ? w*dpk : (w*dpk)/n;
+  let flags = [];
+  if (maxd>0 && single>maxd) { single=maxd; flags.push("Single dose capped at max ("+maxd+" mg)"); }
+  let daily = single*n;
+  if (maxday>0 && daily>maxday) { flags.push("Daily total ("+r(daily)+" mg) exceeds max daily dose ("+maxday+" mg)"); }
+  const mgkgDay = daily/w;
+  const items = [["Single dose", r(single)+" mg"]];
+  if (conc>0) items.push(["Volume per dose", r(single/conc)+" mL"]);
+  items.push(["Frequency", n+" times/day (every "+r(24/n,1)+" h)"]);
+  items.push(["Total daily dose", r(daily)+" mg ("+r(mgkgDay)+" mg/kg/day)"]);
+  flags.forEach(f => items.push(["Notice", f, "bad"]));
+  if (!flags.length) items.push(["Status", "Within standard entered maximums", "good"]);
+  $("d_out").innerHTML = bl(items);
+}
+
+function safeEval(expr, vars) {
+  const allowedFns = ["min","max","sqrt","round","pow","abs","ceil","floor","log","exp"];
+  if (!/^[0-9a-zA-Z_+\-*\/().,\s^]*$/.test(expr)) throw new Error("Illegal character");
+  const ids = expr.match(/[a-zA-Z_]+/g) || [];
+  for (const id of ids) if (!(id in vars) && !allowedFns.includes(id)) throw new Error("Unknown name: "+id);
+  const js = expr.replace(/\^/g, "**");
+  const names = Object.keys(vars).concat(allowedFns);
+  const vals = Object.values(vars).concat(allowedFns.map(f=>Math[f]));
+  return new Function(...names, '"use strict"; return ('+js+');')(...vals);
+}
+
+function calcFormula() {
+  const vars = {w:v("f_w"), a:v("f_a"), h:v("f_h")};
+  const unit = $("f_unit").value;
+  const lines = $("f_expr").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  const items = [];
+  for (const ln of lines) {
+    const code = '<code>'+ln.replace(/</g,"&lt;")+'</code>';
+    try { items.push([code, r(safeEval(ln, vars),3)+' '+unit]); }
+    catch(e) { items.push([code, e.message, "bad"]); }
+  }
+  $("f_out").innerHTML = bl(items);
+}
+
+function calcEmerg() {
+  const w=v("e_w"), a=v("e_a");
+  if (!(w>0)) { $("e_out").innerHTML='<span class="warn">Enter weight.</span>'; return; }
+  const rows = [
+    ["Adrenaline (arrest) 10 mcg/kg IV/IO", r(w*0.01,3)+" mg = "+r(w*0.1,2)+" mL of 1:10,000"],
+    ["Defibrillation (4 J/kg)", r(w*4,0)+" J"],
+    ["Fluid bolus (10 mL/kg)", r(w*10,0)+" mL"],
+    ["Fluid bolus (20 mL/kg)", r(w*20,0)+" mL"],
+    ["Dextrose 10% (2 mL/kg)", r(w*2,1)+" mL"],
+    ["Amiodarone (5 mg/kg)", r(w*5,1)+" mg"],
+    ["Atropine 20 mcg/kg (min 100 mcg, max 600)", r(Math.min(Math.max(w*20,100),600),0)+" mcg"],
+    ["Lorazepam 0.1 mg/kg (max 4 mg)", r(Math.min(w*0.1,4),2)+" mg"],
+  ];
+  if (a>=1) {
+    rows.push(["ETT uncuffed (age/4 + 4)", r(a/4+4,1)+" mm ID"]);
+    rows.push(["ETT cuffed (age/4 + 3.5)", r(a/4+3.5,1)+" mm ID"]);
+    rows.push(["ETT depth (age/2 + 12)", r(a/2+12,1)+" cm at lip"]);
+  }
+  $("e_out").innerHTML = bl(rows);
+}
+
+function calcFluids() {
+  const w=v("fl_w"), b=v("fl_b"), d=v("fl_d"), t=v("fl_t");
+  if (!(w>0)) { $("fl_out").innerHTML='<span class="warn">Enter weight.</span>'; return; }
+  let day = w<=10 ? w*100 : w<=20 ? 1000+(w-10)*50 : 1500+(w-20)*20;
+  const hr = w<=10 ? w*4 : w<=20 ? 40+(w-10)*2 : 60+(w-20);
+  const deficit = w*d*10;
+  const rows = [
+    ["Maintenance (24 h)", r(day,0)+" mL/day"],
+    ["Maintenance rate (4-2-1)", r(hr,1)+" mL/h"],
+    ["Bolus ("+b+" mL/kg)", r(w*b,0)+" mL"],
+    ["Fluid deficit ("+d+"%)", r(deficit,0)+" mL"],
+    ["Deficit replaced over "+t+" h", r(deficit/t,1)+" mL/h"],
+    ["Total infusion rate", r(hr+deficit/t,1)+" mL/h"],
+  ];
+  $("fl_out").innerHTML = bl(rows);
+}
+
+function calcBody() {
+  const a=v("b_a"), w=v("b_w"), h=v("b_h"), cr=v("b_cr");
+  const rows = [];
+  if (w>0 && h>0) rows.push(["BSA (Mosteller)", r(Math.sqrt(h*w/3600),3)+" m\u00B2"]);
+  if (h>0 && cr>0) rows.push(["eGFR (Schwartz)", r(0.413*h/cr,1)+" mL/min/1.73 m\u00B2"]);
+  if (a>0) {
+    const m=a*12;
+    if (a<1) rows.push(["Estimated weight (infant, 0.5 x m + 4)", r(0.5*m+4,1)+" kg"]);
+    else if (a<=5) rows.push(["Estimated weight (APLS, 2 x (age+4))", r(2*(a+4),1)+" kg"]);
+    else if (a<=12) rows.push(["Estimated weight (APLS, 3 x age + 7)", r(3*a+7,1)+" kg"]);
+  }
+  $("b_out").innerHTML = bl(rows);
+}
+
+function applyProduct() {
+  const p = $("t_prod").value;
+  const isRbc = p === "prbc";
+  ["t_hbbox","t_tgbox","t_rbox"].forEach(id => $(id).style.display = isRbc ? "" : "none");
+  $("t_dbox").style.display = isRbc ? "none" : "";
+  if (p === "plt")  { $("t_dose").value = 10; $("t_hrs").value = 1; }
+  if (p === "ffp")  { $("t_dose").value = 12; $("t_hrs").value = 3; }
+  if (p === "cryo") { $("t_dose").value = 5;  $("t_hrs").value = 1; }
+  if (isRbc) $("t_hrs").value = 4;
+}
+
+function calcTransfusion() {
+  const p = $("t_prod").value, w = v("t_w"), hrs = v("t_hrs");
+  if (!(w > 0 && hrs > 0)) { $("t_out").innerHTML = '<span class="warn">Enter valid weight & time.</span>'; return; }
+  let vol, basis, warn = "";
+  if (p === "prbc") {
+    const hb = v("t_hb"), tg = v("t_tg"), rise = v("t_rise");
+    if (!(tg > hb)) { $("t_out").innerHTML = '<span class="warn">Target Hb must exceed current Hb.</span>'; return; }
+    const mlkg = (tg - hb) / rise;
+    vol = mlkg * w;
+    basis = r(mlkg, 1) + " mL/kg for " + r(tg - hb, 1) + " g/dL rise";
+    if (mlkg > 20) warn = "Volume exceeds 20 mL/kg - split aliquots to prevent overload.";
+  } else {
+    const d = v("t_dose");
+    vol = d * w;
+    basis = r(d, 1) + " mL/kg";
+  }
+  const rate = vol / hrs;
+  const items = [
+    ["Total Volume", r(vol, 0) + " mL"],
+    ["Basis", basis],
+    ["Infusion Rate", r(rate, 1) + " mL/h (" + r(rate/w, 1) + " mL/kg/h)"],
+  ];
+  if (hrs > 4 && p === "prbc") items.push(["Warning", "Red cells must finish within 4 h of release.", "bad"]);
+  if (warn) items.push(["Warning", warn, "bad"]);
+  $("t_out").innerHTML = bl(items);
+}
+
+const VACCINE_DATA = [
+  { age: "At Birth", name: "BCG Vaccine", desc: "Bacillus Calmette–Guérin (Tuberculosis)", route: "Intradermal (Left arm)" },
+  { age: "At Birth", name: "Hepatitis B", desc: "HepB-0 (Within first 24 hours)", route: "Intramuscular" },
+  { age: "2 Months", name: "Hexavalent / Pentavalent", desc: "DTwP/DTaP, HepB, Hib + Polio", route: "Intramuscular + Oral (OPV)" },
+  { age: "2 Months", name: "Polio", desc: "Inactivated Polio Vaccine (IPV)", route: "Intramuscular / Subcutaneous" },
+  { age: "4 Months", name: "Hexavalent / Pentavalent", desc: "DTwP/DTaP + HepB + Hib + Oral Polio (OPV)", route: "Intramuscular + Oral drops" },
+  { age: "4 Months", name: "Polio", desc: "Inactivated Polio Vaccine (IPV)", route: "Intramuscular / Subcutaneous" },
+  { age: "6 Months", name: "Hexavalent / Pentavalent", desc: "DTwP/DTaP + HepB + Hib + Oral Polio (OPV)", route: "Intramuscular + Oral drops" },
+  { age: "6 Months", name: "Polio", desc: "Inactivated Polio Vaccine (IPV)", route: "Intramuscular / Subcutaneous" },
+  { age: "9 Months", name: "MMR", desc: "Measles, Mumps, Rubella - Dose 1", route: "Subcutaneous" },
+  { age: "9 Months", name: "Polio", desc: "Oral Polio Vaccine (OPV) booster drops", route: "Oral drops" },
+  { age: "12 Months", name: "MMR", desc: "Measles, Mumps, Rubella - Dose 2", route: "Subcutaneous" },
+  { age: "12 Months", name: "Chickenpox", desc: "Varicella - Dose 1", route: "Subcutaneous" },
+  { age: "18 Months", name: "DTwP", desc: "Diphtheria, Tetanus, Pertussis booster", route: "Intramuscular" },
+  { age: "18 Months", name: "Polio", desc: "Oral Polio Vaccine (OPV) booster drops", route: "Oral drops" },
+  { age: "18 Months", name: "Hepatitis A", desc: "Hepatitis A - Dose 1", route: "Intramuscular" },
+  { age: "School Age (4-6 Years)", name: "DTwP", desc: "School entry booster (DT/Td)", route: "Intramuscular" },
+  { age: "School Age (4-6 Years)", name: "Polio", desc: "OPV school booster", route: "Oral drops" },
+  { age: "School Age (4-6 Years)", name: "MMR", desc: "MMR school entry booster", route: "Subcutaneous" }
+];
+
+function renderVaccineTable() {
+  const age = $("vax_filter_age").value;
+  const nm = $("vax_filter_name").value;
+  const tbody = $("vax_table_body");
+  const filtered = VACCINE_DATA.filter(item => {
+    return (age === "all" || item.age.toLowerCase() === age.toLowerCase()) &&
+           (nm === "all" || item.name.toLowerCase().includes(nm.toLowerCase()));
+  });
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--muted); padding:20px;">No vaccines match selection.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(item => `
+    <tr>
+      <td><strong>${item.age}</strong></td>
+      <td><span class="pill brand">${item.name}</span></td>
+      <td>${item.desc}</td>
+      <td><code>${item.route}</code></td>
+    </tr>
+  `).join("");
+}
+function filterVaccines() { renderVaccineTable(); }
+
+/* Drug Interactions */
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const HI  = /\b(contraindicated|contraindication|avoid(?:ed)?|fatal|death|life-threatening|serious|severe|bleeding|anaphyla\w*|toxicity)\b/gi;
+const MID = /\b(monitor(?:ing)?|caution|may increase|may decrease|adjust(?:ment)?|risk|hepatic|renal)\b/gi;
+function hl(s) {
+  return esc(s).replace(HI, '<mark class="hr">$1</mark>').replace(MID, '<mark class="ho">$1</mark>');
+}
+function xSection(title, arr, open, theme) {
+  if (!arr || !arr.length) return `<div class="xsec ${theme}" style="padding:10px 14px"><b style="color:var(--xc)">${title}</b> <span style="color:var(--muted)">- None listed on label</span></div>`;
+  const lis = arr.map(s => `<li>${hl(s)}</li>`).join("");
+  return `<details class="xsec ${theme}" ${open ? 'open':''}><summary>${title} (${arr.length})</summary><div class="xbody"><ul class="bl">${lis}</ul></div></details>`;
+}
+function quickDrug(n) { $("x_name").value = n; lookupDrug(); }
+
+
+/* ===== openFDA lookup (runs in the browser; ported from the original Python server) ===== */
+const OPENFDA_URL = "https://api.fda.gov/drug/label.json";
+const DRUG_CACHE = new Map();
+
+function toBullets(text) {
+  if (!text) return [];
+  let t = String(text).replace(/\s+/g, " ").trim();
+  t = t.replace(/^(?:\d+(?:\.\d+)*\s*)?[A-Z][A-Z &/,\-]{5,}(?=\s|$)\s*/, "");
+  const parts = t.split(/\s(?=\d{1,2}\.\d{1,2}\s+[A-Z])/);
+  const bullets = [];
+  for (let part of parts) {
+    part = part.replace(/^\d{1,2}\.\d{1,2}\s+/, "").trim();
+    // split into sentences without regex look-behind (works on older Safari too)
+    const sentences = part.replace(/([.!?])\s+(?=[A-Z(\[])/g, "$1\u0001").split("\u0001");
+    for (let s of sentences) {
+      s = s.trim();
+      if (s.length > 2) bullets.push(s);
+    }
+  }
+  return bullets;
+}
+
+async function fetchDrug(rawName) {
+  const name = String(rawName).replace(/["\\]/g, " ").split(/\s+/).filter(Boolean).join(" ").slice(0, 80);
+  if (name.length < 2) return { ok: false, data: { error: "Please enter a drug name (at least 2 characters)." } };
+  const key = name.toLowerCase();
+  if (DRUG_CACHE.has(key)) return { ok: true, data: DRUG_CACHE.get(key) };
+
+  const search = 'openfda.generic_name:"' + name + '" OR openfda.brand_name:"' + name + '" OR openfda.substance_name:"' + name + '"';
+  const url = OPENFDA_URL + "?search=" + encodeURIComponent(search) + "&limit=10";
+
+  let data;
+  try {
+    const resp = await fetch(url);
+    if (resp.status === 404) return { ok: false, data: { error: 'No label found for "' + name + '". Check spelling or generic name.' } };
+    if (!resp.ok) return { ok: false, data: { error: "Drug database returned an error (HTTP " + resp.status + "). Try again later." } };
+    data = await resp.json();
+  } catch (e) {
+    return { ok: false, data: { error: "Could not reach the drug database. Check your internet connection." } };
+  }
+
+  const results = (data.results || []).slice();
+  if (!results.length) return { ok: false, data: { error: 'No label found for "' + name + '".' } };
+  const score = it => (it.drug_interactions ? 1 : 0) + (it.contraindications ? 1 : 0);
+  results.sort((a, b) => score(b) - score(a));
+
+  const best = results[0], ofda = best.openfda || {};
+  const join = f => { const val = best[f]; return Array.isArray(val) ? val.join("\n\n") : (val || ""); };
+  const out = {
+    query: name,
+    generic_name: (ofda.generic_name || []).slice(0, 3).join(", "),
+    brand_name: (ofda.brand_name || []).slice(0, 4).join(", "),
+    drug_class: (ofda.pharm_class_epc || []).slice(0, 3).join(", "),
+    interactions: toBullets(join("drug_interactions")),
+    contraindications: toBullets(join("contraindications")),
+    boxed_warning: toBullets(join("boxed_warning")),
+    pediatric_use: toBullets(join("pediatric_use")),
+    source: "openFDA drug label database (US FDA)"
+  };
+  DRUG_CACHE.set(key, out);
+  return { ok: true, data: out };
+}
+
+async function lookupDrug() {
+  const name = $("x_name").value.trim();
+  const out = $("x_out");
+  if (name.length < 2) { out.innerHTML = '<span class="warn">Enter a drug name.</span>'; return; }
+  $("x_btn").disabled = true;
+  out.innerHTML = '<span style="color:var(--muted)">Searching openFDA...</span>';
+  try {
+    const res = await fetchDrug(name);
+    const d = res.data;
+    if (!res.ok) { out.innerHTML = '<span class="warn">&#9888; ' + esc(d.error || "Lookup failed") + '</span>'; return; }
+    let html = `<h3 style="margin:0 0 4px; font-size:20px; color:var(--accent)">${esc(d.generic_name || d.query)}</h3>`;
+    if (d.brand_name) html += `<div><span style="font-size:12px;color:var(--muted)">Brands:</span> ${d.brand_name.split(", ").map(b=>'<span class="pill brand">'+esc(b)+'</span>').join("")}</div>`;
+    if (d.drug_class) html += `<div><span style="font-size:12px;color:var(--muted)">Class:</span> ${d.drug_class.split(", ").map(b=>'<span class="pill cls">'+esc(b)+'</span>').join("")}</div>`;
+    if (d.boxed_warning && d.boxed_warning.length) html += xSection("Boxed Warning", d.boxed_warning, true, "red");
+    html += xSection("Contraindications", d.contraindications, true, "red");
+    html += xSection("Drug Interactions", d.interactions, true, "amber");
+    if (d.pediatric_use && d.pediatric_use.length) html += xSection("Pediatric Use", d.pediatric_use, false, "green");
+    out.innerHTML = html;
+  } catch (e) {
+    out.innerHTML = '<span class="warn">&#9888; Unable to reach server.</span>';
+  } finally {
+    $("x_btn").disabled = false;
+  }
+}
+
+
+/* ===== Vitals & GCS ===== */
+function setVTab(t) {
+  document.querySelectorAll("#vtabs button").forEach(b => b.classList.toggle("active", b.dataset.v === t));
+  document.querySelectorAll(".vpanel").forEach(p => p.classList.toggle("active", p.id === "v_" + t));
+  updateSidebar();
+}
+
+/* APLS reference ranges: [low, high] */
+const VITAL_BANDS = [
+  { label: "Under 1 year", rr: [30, 40], hr: [110, 160], sbp: [70, 90] },
+  { label: "1 - 2 years",  rr: [25, 35], hr: [100, 150], sbp: [80, 95] },
+  { label: "2 - 5 years",  rr: [25, 30], hr: [95, 140],  sbp: [80, 100] },
+  { label: "5 - 12 years", rr: [20, 25], hr: [80, 120],  sbp: [90, 110] },
+  { label: "Over 12 years", rr: [15, 20], hr: [60, 100], sbp: [100, 120] }
+];
+const vitalBand = a => a < 1 ? 0 : a < 2 ? 1 : a < 5 ? 2 : a <= 12 ? 3 : 4;
+const hypoSBP = a => a < 1 ? 70 : a <= 10 ? 70 + 2 * a : 90;
+
+function rangeStatus(x, rng, lowTxt, highTxt) {
+  if (x < rng[0]) return [lowTxt + " (below " + rng[0] + ")", "bad"];
+  if (x > rng[1]) return [highTxt + " (above " + rng[1] + ")", "bad"];
+  return ["Within range (" + rng[0] + " - " + rng[1] + ")", "good"];
+}
+
+function calcVitals() {
+  const out = $("vt_out");
+  let age = v("vt_age");
+  if (!(age >= 0)) { out.innerHTML = '<span class="warn">Enter the child\u2019s age.</span>'; return; }
+  if ($("vt_unit").value === "m") age = age / 12;
+  const bi = vitalBand(age), band = VITAL_BANDS[bi];
+  const hr = v("vt_hr"), rr = v("vt_rr"), sbp = v("vt_sbp"), spo2 = v("vt_spo2");
+
+  const items = [["Age band", band.label]];
+  if (age < 1 / 12) items.push(["Note", "Neonate: these ranges do not apply. Use a neonatal reference.", "bad"]);
+  if (hr >= 0)  { const s = rangeStatus(hr, band.hr, "Low", "High"); items.push(["Heart rate " + hr, s[0], s[1]]); }
+  if (rr >= 0)  { const s = rangeStatus(rr, band.rr, "Low", "High"); items.push(["Respiratory rate " + rr, s[0], s[1]]); }
+  if (sbp >= 0) {
+    const lim = hypoSBP(age);
+    if (sbp < lim) items.push(["Systolic BP " + sbp, "HYPOTENSION (below " + r(lim, 0) + " mmHg for this age)", "bad"]);
+    else { const s = rangeStatus(sbp, band.sbp, "Below usual range", "High"); items.push(["Systolic BP " + sbp, s[0], s[1]]); }
+  }
+  if (spo2 >= 0 && spo2 <= 100) {
+    items.push(["SpO2 " + spo2 + "%", spo2 < 92 ? "Low: hypoxia (below 92%)" : "No hypoxia flagged (92% or above)", spo2 < 92 ? "bad" : "good"]);
+  }
+  if (items.length === 1) items.push(["Next step", "Enter measurements above to check them against the range."]);
+
+  const rows = VITAL_BANDS.map((b, i) =>
+    '<tr' + (i === bi ? ' class="hl"' : '') + '><td>' + b.label + '</td><td>' + b.rr[0] + ' - ' + b.rr[1] +
+    '</td><td>' + b.hr[0] + ' - ' + b.hr[1] + '</td><td>' + b.sbp[0] + ' - ' + b.sbp[1] + '</td></tr>').join("");
+  out.innerHTML = bl(items) +
+    '<div style="overflow-x:auto;margin-top:16px"><table><thead><tr><th>Age</th><th>RR (/min)</th><th>HR (/min)</th><th>Systolic BP (mmHg)</th></tr></thead><tbody>' +
+    rows + '</tbody></table></div>' +
+    '<p style="font-size:12px;color:var(--muted);margin:10px 0 0">Hypotension: under 70 mmHg below 1 year, under 70 + (2 x age in years) from 1 to 10 years, under 90 mmHg above 10 years.</p>';
+}
+
+function calcGCS() {
+  const e = parseInt($("g_e").value), vv = parseInt($("g_v").value), m = parseInt($("g_m").value);
+  const out = $("g_out");
+  if (!(e > 0 && vv > 0 && m > 0)) { out.innerHTML = '<span style="color:var(--muted)">Select a response for eye, verbal and motor to see the score.</span>'; return; }
+  const total = e + vv + m;
+  const sev = total >= 13 ? ["Mild", "good"] : total >= 9 ? ["Moderate", ""] : ["Severe", "bad"];
+  const items = [["Components", "E" + e + "  V" + vv + "  M" + m], ["Severity", sev[0], sev[1]]];
+  if (total <= 8) items.push(["Action", "GCS 8 or below: consider securing the airway per local protocol.", "bad"]);
+  out.innerHTML = '<div class="score-big">' + total + '<small>/ 15</small></div>' + bl(items);
+}
+
+calcDrug(); calcEmerg(); calcFluids(); calcBody(); calcFormula(); calcTransfusion();
+calcVitals(); calcGCS();
+renderVaccineTable();
+
+/* ===== Sidebar ===== */
+const SB_MOBILE = () => window.innerWidth <= 900;
+
+function updateSidebar() {
+  document.querySelectorAll(".sb-item").forEach(b => {
+    const on = b.dataset.screen === currentScreen;
+    b.classList.toggle("active", on);
+    if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+  });
+  document.querySelectorAll(".sb-subs").forEach(g => g.classList.toggle("open", g.dataset.screen === currentScreen));
+  const dt = document.querySelector("#tabs button.active"), vt = document.querySelector("#vtabs button.active");
+  document.querySelectorAll(".sb-sub").forEach(b => {
+    const cur = b.dataset.screen === currentScreen;
+    const tab = b.dataset.screen === "dosing" ? (dt && dt.dataset.t) : (vt && vt.dataset.v);
+    b.classList.toggle("active", cur && b.dataset.tab === tab);
+  });
+}
+
+function toggleSidebar() {
+  if (SB_MOBILE()) { document.body.classList.toggle("sb-open"); return; }
+  const collapsed = document.body.classList.toggle("sb-collapsed");
+  try { localStorage.setItem("dochelp_sidebar", collapsed ? "closed" : "open"); } catch (e) {}
+  setHeaderH();
+}
+function closeSidebarMobile() { document.body.classList.remove("sb-open"); }
+function goScreen(name) { showScreen(name); closeSidebarMobile(); }
+function goTab(screen, tab) {
+  showScreen(screen);
+  if (screen === "dosing") setTab(tab); else setVTab(tab);
+  closeSidebarMobile();
+}
+
+/* keep the sidebar aligned under the sticky header */
+function setHeaderH() {
+  document.documentElement.style.setProperty("--header-h", $("topHeader").offsetHeight + "px");
+}
+window.addEventListener("resize", () => { setHeaderH(); if (!SB_MOBILE()) closeSidebarMobile(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSidebarMobile(); });
+try { if (localStorage.getItem("dochelp_sidebar") === "closed") document.body.classList.add("sb-collapsed"); } catch (e) {}
+setHeaderH();
+
+showScreen("home");
+</script>
+</body>
+</html>
