@@ -495,6 +495,7 @@
 
   <button class="sb-item" data-screen="transfusion" onclick="goScreen('transfusion')"><span class="sb-ico">&#129656;</span>Transfusion Guide</button>
   <button class="sb-item" data-screen="interactions" onclick="goScreen('interactions')"><span class="sb-ico">&#9879;&#65039;</span>Drug Interactions</button>
+  <button class="sb-item" data-screen="safety" onclick="goScreen('safety')"><span class="sb-ico">&#128737;&#65039;</span>Prescriptions Safety Checker</button>
   <button class="sb-item" data-screen="vaccines" onclick="goScreen('vaccines')"><span class="sb-ico">&#128137;</span>Egyptian Immunization</button>
 
   <button class="sb-item" data-screen="vitals" onclick="goScreen('vitals')"><span class="sb-ico">&#129658;</span>Vitals &amp; GCS</button>
@@ -554,6 +555,15 @@
         <p class="tool-desc">Live openFDA label scanner highlighting contraindications, boxed warnings, and severity-graded interactions.</p>
       </div>
       <span class="tool-cta">Lookup Drug <span>&#8594;</span></span>
+    </div>
+
+    <div class="tool-card interactions" role="button" tabindex="0" onclick="showScreen('safety')">
+      <div>
+        <div class="tool-icon">&#128737;&#65039;</div>
+        <h3 class="tool-title">Prescriptions Safety Checker</h3>
+        <p class="tool-desc">Enter a patient's medicines and clinical details to flag interactions, allergies, duplicates, contraindications, dose errors and monitoring.</p>
+      </div>
+      <span class="tool-cta">Check Prescription <span>&#8594;</span></span>
     </div>
 
     <div class="tool-card vaccines" role="button" tabindex="0" onclick="showScreen('vaccines')">
@@ -707,9 +717,9 @@ w*0.01
 <!-- DRUG INTERACTIONS SCREEN -->
 <div id="screen-interactions" class="screen" hidden>
   <div class="card">
-    <label>Drug name (generic or brand)</label>
+    <label>Drug name (generic, US brand or Egyptian brand)</label>
     <div class="row">
-      <input id="x_name" type="text" placeholder="e.g. ibuprofen, warfarin, augmentin" autocomplete="off"
+      <input id="x_name" type="text" placeholder="e.g. ibuprofen, warfarin, Panadol, Hibiotic" autocomplete="off" list="x_list"
              style="flex:1;min-width:240px" onkeydown="if(event.key==='Enter')lookupDrug()">
       <button class="go" id="x_btn" onclick="lookupDrug()">Search</button>
     </div>
@@ -718,8 +728,43 @@ w*0.01
       <a class="chip" href="#" onclick="quickDrug('amoxicillin');return false">amoxicillin</a>
       <a class="chip" href="#" onclick="quickDrug('warfarin');return false">warfarin</a>
       <a class="chip" href="#" onclick="quickDrug('ciprofloxacin');return false">ciprofloxacin</a>
+      <a class="chip" href="#" onclick="quickDrug('Panadol');return false">Panadol</a>
+      <a class="chip" href="#" onclick="quickDrug('Hibiotic');return false">Hibiotic</a>
+      <a class="chip" href="#" onclick="quickDrug('Cataflam');return false">Cataflam</a>
     </div>
+    <datalist id="x_list"></datalist>
     <div class="out" id="x_out"></div>
+  </div>
+</div>
+
+<!-- PRESCRIPTIONS SAFETY CHECKER SCREEN -->
+<div id="screen-safety" class="screen" hidden>
+  <div class="card">
+    <b>Patient</b>
+    <div class="row" style="margin-top:8px">
+      <div><label>Age</label><div class="row" style="gap:4px"><input id="sc_age" type="number" min="0" step="any" style="width:90px" oninput="scPreg()">
+        <select id="sc_unit" style="width:95px" onchange="scPreg()"><option value="y">years</option><option value="m">months</option><option value="d">days</option></select></div></div>
+      <div><label>Weight (kg)</label><input id="sc_wt" type="number" min="0" step="any" style="width:100px"></div>
+      <div><label>Height (cm)</label><input id="sc_ht" type="number" min="0" step="any" style="width:100px"></div>
+      <div><label>Sex</label><select id="sc_sex" onchange="scPreg()"><option value="">Not stated</option><option value="m">Male</option><option value="f">Female</option></select></div>
+      <div id="sc_pregbox" hidden><label>Pregnancy status</label><select id="sc_preg"><option value="">Not entered</option><option value="not">Not pregnant</option><option value="pregnant">Pregnant</option><option value="breastfeeding">Breastfeeding</option><option value="unknown">Unknown / not tested</option></select></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div><label>eGFR (mL/min/1.73m&sup2;)</label><input id="sc_egfr" type="number" min="0" step="any" style="width:130px"></div>
+      <div style="padding-bottom:10px;color:var(--muted)">or</div>
+      <div><label>Serum creatinine (mg/dL)</label><input id="sc_scr" type="number" min="0" step="any" style="width:150px"></div>
+      <div style="font-size:12px;color:var(--muted);flex:1;min-width:200px;padding-bottom:8px">With creatinine, eGFR is estimated by bedside Schwartz (needs height, under 18) or Cockcroft-Gault (needs weight, 18+).</div>
+    </div>
+    <div style="margin-top:14px"><b>Allergies</b><div id="sc_alg" style="margin-top:6px"></div>
+      <input id="sc_algtxt" type="text" placeholder="Other drug allergies, comma separated (generic or brand)" style="margin-top:6px;width:100%"></div>
+    <div style="margin-top:14px"><b>Conditions</b><div id="sc_con" style="margin-top:6px"></div></div>
+  </div>
+  <div class="card">
+    <b>Medications</b> <span style="font-size:12px;color:var(--muted)">(dose in mg per dose; use the amoxicillin component for amoxicillin/clavulanate and trimethoprim for co-trimoxazole)</span>
+    <div id="sc_meds" style="margin-top:8px"></div>
+    <div class="row" style="margin-top:8px"><button class="go" style="background:transparent;color:var(--accent);border:1px solid var(--accent)" onclick="scAddRow()">+ Add medication</button>
+      <button class="go" id="sc_btn" onclick="scRun()">Check safety</button></div>
+    <div class="out" id="sc_out"></div>
   </div>
 </div>
 
@@ -886,6 +931,7 @@ const SCREENS = {
   dosing: ["Paediatric Dosing Calculator", "Weight-based dosing, emergency drugs, fluids, BSA, and custom formulas"],
   transfusion: ["Transfusion Calculator", "Component volumes and infusion rates by weight"],
   interactions: ["Drug Interactions", "Interactions and contraindications from FDA drug labels"],
+  safety: ["Prescriptions Safety Checker", "Interactions, allergies, duplicates, contraindications, dose errors and monitoring"],
   vaccines: ["Egyptian Vaccination Schedule", "Official MOHP routine childhood immunization timetable"],
   vitals: ["Vitals & GCS", "Age-based vital sign ranges and paediatric Glasgow Coma Scale"]
 };
@@ -1149,34 +1195,28 @@ function toBullets(text) {
   return bullets;
 }
 
-async function fetchDrug(rawName) {
-  const name = String(rawName).replace(/["\\]/g, " ").split(/\s+/).filter(Boolean).join(" ").slice(0, 80);
-  if (name.length < 2) return { ok: false, data: { error: "Please enter a drug name (at least 2 characters)." } };
-  const key = name.toLowerCase();
-  if (DRUG_CACHE.has(key)) return { ok: true, data: DRUG_CACHE.get(key) };
-
-  const search = 'openfda.generic_name:"' + name + '" OR openfda.brand_name:"' + name + '" OR openfda.substance_name:"' + name + '"';
+async function fetchLabel(term, shownName) {
+  const key = term.toLowerCase();
+  if (DRUG_CACHE.has(key)) return { status: 200, out: DRUG_CACHE.get(key) };
+  const search = 'openfda.generic_name:"' + term + '" OR openfda.brand_name:"' + term + '" OR openfda.substance_name:"' + term + '"';
   const url = OPENFDA_URL + "?search=" + encodeURIComponent(search) + "&limit=10";
-
   let data;
   try {
     const resp = await fetch(url);
-    if (resp.status === 404) return { ok: false, data: { error: 'No label found for "' + name + '". Check spelling or generic name.' } };
-    if (!resp.ok) return { ok: false, data: { error: "Drug database returned an error (HTTP " + resp.status + "). Try again later." } };
+    if (resp.status === 404) return { status: 404, out: { error: 'No label found for "' + shownName + '". Check spelling or generic name.' } };
+    if (!resp.ok) return { status: 502, out: { error: "Drug database returned an error (HTTP " + resp.status + "). Try again later." } };
     data = await resp.json();
   } catch (e) {
-    return { ok: false, data: { error: "Could not reach the drug database. Check your internet connection." } };
+    return { status: 502, out: { error: "Could not reach the drug database. Check your internet connection." } };
   }
-
   const results = (data.results || []).slice();
-  if (!results.length) return { ok: false, data: { error: 'No label found for "' + name + '".' } };
+  if (!results.length) return { status: 404, out: { error: 'No label found for "' + shownName + '".' } };
   const score = it => (it.drug_interactions ? 1 : 0) + (it.contraindications ? 1 : 0);
   results.sort((a, b) => score(b) - score(a));
-
   const best = results[0], ofda = best.openfda || {};
   const join = f => { const val = best[f]; return Array.isArray(val) ? val.join("\n\n") : (val || ""); };
   const out = {
-    query: name,
+    query: shownName,
     generic_name: (ofda.generic_name || []).slice(0, 3).join(", "),
     brand_name: (ofda.brand_name || []).slice(0, 4).join(", "),
     drug_class: (ofda.pharm_class_epc || []).slice(0, 3).join(", "),
@@ -1187,7 +1227,30 @@ async function fetchDrug(rawName) {
     source: "openFDA drug label database (US FDA)"
   };
   DRUG_CACHE.set(key, out);
-  return { ok: true, data: out };
+  return { status: 200, out };
+}
+
+async function fetchDrug(rawName) {
+  const name = String(rawName).replace(/["\\]/g, " ").split(/\s+/).filter(Boolean).join(" ").slice(0, 80);
+  if (name.length < 2) return { ok: false, data: { error: "Please enter a drug name (at least 2 characters)." } };
+
+  const [egKey, egBrand] = resolveEgypt(name);
+  const eg = egKey ? EG_DATA[egKey] : null;
+  const term = eg ? eg.us : (US_ALIASES[name.toLowerCase()] || name);
+
+  let { status, out } = await fetchLabel(term, name);
+  if (eg) {
+    const egypt = { generic: egKey, ar: eg.ar, brands: eg.brands, matched_brand: egBrand, searched_as: term };
+    if (status === 200) out = Object.assign({}, out);
+    else if (status === 404) {
+      // Not in the US label database (e.g. domperidone): still show Egyptian info.
+      out = { query: name, generic_name: egKey, brand_name: "", drug_class: "", interactions: [], contraindications: [],
+              boxed_warning: [], pediatric_use: [], label_missing: true, source: "Local Egyptian brand list (no US FDA label found)" };
+      status = 200;
+    } else return { ok: false, data: out };
+    out.egypt = egypt;
+  }
+  return { ok: status === 200, data: out };
 }
 
 async function lookupDrug() {
@@ -1195,18 +1258,28 @@ async function lookupDrug() {
   const out = $("x_out");
   if (name.length < 2) { out.innerHTML = '<span class="warn">Enter a drug name.</span>'; return; }
   $("x_btn").disabled = true;
-  out.innerHTML = '<span style="color:var(--muted)">Searching openFDA...</span>';
+  out.innerHTML = '<span style="color:var(--muted)">Searching...</span>';
   try {
     const res = await fetchDrug(name);
     const d = res.data;
     if (!res.ok) { out.innerHTML = '<span class="warn">&#9888; ' + esc(d.error || "Lookup failed") + '</span>'; return; }
     let html = `<h3 style="margin:0 0 4px; font-size:20px; color:var(--accent)">${esc(d.generic_name || d.query)}</h3>`;
-    if (d.brand_name) html += `<div><span style="font-size:12px;color:var(--muted)">Brands:</span> ${d.brand_name.split(", ").map(b=>'<span class="pill brand">'+esc(b)+'</span>').join("")}</div>`;
+    const eg = d.egypt;
+    if (eg) {
+      if (eg.matched_brand) html += `<div style="font-size:13px;color:var(--muted);margin:2px 0 6px">Egyptian brand <b style="color:var(--ink)">${esc(eg.matched_brand)}</b> = ${esc(eg.generic)}${eg.ar ? ' (' + esc(eg.ar) + ')' : ''}. Label data below is for the generic.</div>`;
+      else if (eg.ar) html += `<div style="font-size:13px;color:var(--muted);margin:2px 0 6px">${esc(eg.ar)}</div>`;
+      html += `<div><span style="font-size:12px;color:var(--muted)">Egypt brands:</span> ${eg.brands.map(b=>'<span class="pill brand">'+esc(b)+'</span>').join("")}</div>`;
+    }
+    if (d.label_missing) html += '<div class="xsec amber" style="padding:10px 14px;margin:8px 0">No US FDA label found for this drug, so interaction and contraindication data are not available here. Check the Egyptian Drug Authority leaflet or another reference.</div>';
+    if (d.brand_name) html += `<div><span style="font-size:12px;color:var(--muted)">${eg ? 'US brands' : 'Brands'}:</span> ${d.brand_name.split(", ").map(b=>'<span class="pill brand">'+esc(b)+'</span>').join("")}</div>`;
     if (d.drug_class) html += `<div><span style="font-size:12px;color:var(--muted)">Class:</span> ${d.drug_class.split(", ").map(b=>'<span class="pill cls">'+esc(b)+'</span>').join("")}</div>`;
-    if (d.boxed_warning && d.boxed_warning.length) html += xSection("Boxed Warning", d.boxed_warning, true, "red");
-    html += xSection("Contraindications", d.contraindications, true, "red");
-    html += xSection("Drug Interactions", d.interactions, true, "amber");
-    if (d.pediatric_use && d.pediatric_use.length) html += xSection("Pediatric Use", d.pediatric_use, false, "green");
+    if (!d.label_missing) {
+      if (d.boxed_warning && d.boxed_warning.length) html += xSection("Boxed Warning", d.boxed_warning, true, "red");
+      html += xSection("Contraindications", d.contraindications, true, "red");
+      html += xSection("Drug Interactions", d.interactions, true, "amber");
+      if (d.pediatric_use && d.pediatric_use.length) html += xSection("Pediatric Use", d.pediatric_use, false, "green");
+    }
+    if (eg) html += '<p style="font-size:12px;color:var(--muted);margin:12px 0 0">Egyptian brand list is a starter reference. Combination or variant products (e.g. "Extra", "Plus", "Cold &amp; Flu") can contain additional ingredients, so check the pack. Interaction text comes from the US FDA label and may differ from the Egyptian leaflet.</p>';
     out.innerHTML = html;
   } catch (e) {
     out.innerHTML = '<span class="warn">&#9888; Unable to reach server.</span>';
@@ -1215,6 +1288,1894 @@ async function lookupDrug() {
   }
 }
 
+
+/* ===== Egyptian market data + safety rules (ported from peds_dosing_app.py) ===== */
+const EG_DATA = {
+ "paracetamol": {
+  "us": "acetaminophen",
+  "ar": "باراسيتامول",
+  "brands": [
+   "Panadol",
+   "Cetal",
+   "Adol",
+   "Abimol",
+   "Fevadol"
+  ]
+ },
+ "ibuprofen": {
+  "us": "ibuprofen",
+  "ar": "ايبوبروفين",
+  "brands": [
+   "Brufen",
+   "Nurofen",
+   "Abufen"
+  ]
+ },
+ "diclofenac": {
+  "us": "diclofenac",
+  "ar": "ديكلوفيناك",
+  "brands": [
+   "Voltaren",
+   "Cataflam",
+   "Olfen",
+   "Declophen"
+  ]
+ },
+ "amoxicillin": {
+  "us": "amoxicillin",
+  "ar": "اموكسيسيلين",
+  "brands": [
+   "Amoxil",
+   "Hiconcil",
+   "Ospamox"
+  ]
+ },
+ "amoxicillin/clavulanate": {
+  "us": "amoxicillin and clavulanate potassium",
+  "ar": "اموكسيسيلين كلافولانيك",
+  "brands": [
+   "Augmentin",
+   "Hibiotic",
+   "Curam"
+  ]
+ },
+ "azithromycin": {
+  "us": "azithromycin",
+  "ar": "ازيثرومايسين",
+  "brands": [
+   "Zithromax",
+   "Azithrocin",
+   "Xithrone"
+  ]
+ },
+ "clarithromycin": {
+  "us": "clarithromycin",
+  "ar": "كلاريثروميسين",
+  "brands": [
+   "Klacid"
+  ]
+ },
+ "erythromycin": {
+  "us": "erythromycin",
+  "ar": "اريثروميسين",
+  "brands": [
+   "Erythrocin"
+  ]
+ },
+ "cefuroxime": {
+  "us": "cefuroxime",
+  "ar": "سيفوروكسيم",
+  "brands": [
+   "Zinnat"
+  ]
+ },
+ "cefixime": {
+  "us": "cefixime",
+  "ar": "سيفيكسيم",
+  "brands": [
+   "Suprax"
+  ]
+ },
+ "cefaclor": {
+  "us": "cefaclor",
+  "ar": "سيفاكلور",
+  "brands": [
+   "Ceclor"
+  ]
+ },
+ "cefadroxil": {
+  "us": "cefadroxil",
+  "ar": "سيفادروكسيل",
+  "brands": [
+   "Duricef"
+  ]
+ },
+ "ceftriaxone": {
+  "us": "ceftriaxone",
+  "ar": "سيفترياكسون",
+  "brands": [
+   "Rocephin"
+  ]
+ },
+ "ciprofloxacin": {
+  "us": "ciprofloxacin",
+  "ar": "سيبروفلوكساسين",
+  "brands": [
+   "Ciprobay",
+   "Ciprocin"
+  ]
+ },
+ "metronidazole": {
+  "us": "metronidazole",
+  "ar": "ميترونيدازول",
+  "brands": [
+   "Flagyl",
+   "Amrizole"
+  ]
+ },
+ "sulfamethoxazole/trimethoprim": {
+  "us": "sulfamethoxazole and trimethoprim",
+  "ar": "سلفاميثوكسازول تريميثوبريم",
+  "brands": [
+   "Septrin",
+   "Bactrim"
+  ]
+ },
+ "clindamycin": {
+  "us": "clindamycin",
+  "ar": "كليندامايسين",
+  "brands": [
+   "Dalacin C"
+  ]
+ },
+ "fluconazole": {
+  "us": "fluconazole",
+  "ar": "فلوكونازول",
+  "brands": [
+   "Diflucan"
+  ]
+ },
+ "acyclovir": {
+  "us": "acyclovir",
+  "ar": "اسيكلوفير",
+  "brands": [
+   "Zovirax"
+  ]
+ },
+ "oseltamivir": {
+  "us": "oseltamivir",
+  "ar": "اوسيلتاميفير",
+  "brands": [
+   "Tamiflu"
+  ]
+ },
+ "albendazole": {
+  "us": "albendazole",
+  "ar": "البندازول",
+  "brands": [
+   "Zentel"
+  ]
+ },
+ "mebendazole": {
+  "us": "mebendazole",
+  "ar": "ميبيندازول",
+  "brands": [
+   "Vermox"
+  ]
+ },
+ "domperidone": {
+  "us": "domperidone",
+  "ar": "دومبيريدون",
+  "brands": [
+   "Motilium",
+   "Motinorm"
+  ]
+ },
+ "ondansetron": {
+  "us": "ondansetron",
+  "ar": "اوندانسيترون",
+  "brands": [
+   "Zofran"
+  ]
+ },
+ "salbutamol": {
+  "us": "albuterol",
+  "ar": "سالبيوتامول",
+  "brands": [
+   "Ventolin",
+   "Farcolin"
+  ]
+ },
+ "montelukast": {
+  "us": "montelukast",
+  "ar": "مونتيلوكاست",
+  "brands": [
+   "Singulair",
+   "Montiget"
+  ]
+ },
+ "cetirizine": {
+  "us": "cetirizine",
+  "ar": "سيتيريزين",
+  "brands": [
+   "Zyrtec"
+  ]
+ },
+ "loratadine": {
+  "us": "loratadine",
+  "ar": "لوراتادين",
+  "brands": [
+   "Claritin",
+   "Clarityne"
+  ]
+ },
+ "desloratadine": {
+  "us": "desloratadine",
+  "ar": "ديسلوراتادين",
+  "brands": [
+   "Aerius"
+  ]
+ },
+ "chlorpheniramine": {
+  "us": "chlorpheniramine",
+  "ar": "كلورفينيرامين",
+  "brands": [
+   "Piriton"
+  ]
+ },
+ "ketotifen": {
+  "us": "ketotifen",
+  "ar": "كيتوتيفين",
+  "brands": [
+   "Zaditen"
+  ]
+ },
+ "ambroxol": {
+  "us": "ambroxol",
+  "ar": "امبروكسول",
+  "brands": [
+   "Mucosolvan"
+  ]
+ },
+ "acetylcysteine": {
+  "us": "acetylcysteine",
+  "ar": "اسيتيل سيستين",
+  "brands": [
+   "Fluimucil"
+  ]
+ },
+ "prednisolone": {
+  "us": "prednisolone",
+  "ar": "بريدنيزولون",
+  "brands": [
+   "Deltacortril"
+  ]
+ },
+ "dexamethasone": {
+  "us": "dexamethasone",
+  "ar": "ديكساميثازون",
+  "brands": [
+   "Decadron",
+   "Epidron"
+  ]
+ },
+ "omeprazole": {
+  "us": "omeprazole",
+  "ar": "اوميبرازول",
+  "brands": [
+   "Losec",
+   "Omez"
+  ]
+ },
+ "esomeprazole": {
+  "us": "esomeprazole",
+  "ar": "ايسوميبرازول",
+  "brands": [
+   "Nexium"
+  ]
+ },
+ "pantoprazole": {
+  "us": "pantoprazole",
+  "ar": "بانتوبرازول",
+  "brands": [
+   "Controloc"
+  ]
+ },
+ "lactulose": {
+  "us": "lactulose",
+  "ar": "لاكتولوز",
+  "brands": [
+   "Duphalac"
+  ]
+ },
+ "carbamazepine": {
+  "us": "carbamazepine",
+  "ar": "كاربامازيبين",
+  "brands": [
+   "Tegretol"
+  ]
+ },
+ "valproate": {
+  "us": "valproic acid",
+  "ar": "فالبروات",
+  "brands": [
+   "Depakine"
+  ]
+ },
+ "levetiracetam": {
+  "us": "levetiracetam",
+  "ar": "ليفيتيراسيتام",
+  "brands": [
+   "Keppra"
+  ]
+ },
+ "diazepam": {
+  "us": "diazepam",
+  "ar": "ديازيبام",
+  "brands": [
+   "Valium"
+  ]
+ },
+ "midazolam": {
+  "us": "midazolam",
+  "ar": "ميدازولام",
+  "brands": [
+   "Dormicum"
+  ]
+ },
+ "warfarin": {
+  "us": "warfarin",
+  "ar": "وارفارين",
+  "brands": [
+   "Marevan",
+   "Coumadin"
+  ]
+ }
+};
+const US_ALIASES = {"paracetamol": "acetaminophen", "salbutamol": "albuterol", "adrenaline": "epinephrine", "noradrenaline": "norepinephrine", "frusemide": "furosemide", "glibenclamide": "glyburide", "rifampicin": "rifampin", "pethidine": "meperidine"};
+const SAFE = {
+"paracetamol": {
+"cls": [
+"analgesic"
+],
+"mgkg": [
+60,
+75
+],
+"abs": 4000,
+"freq": 4,
+"minage": [
+[
+1,
+"warning",
+"Under 1 month: neonatal dosing differs (e.g. 10 mg/kg); verify."
+]
+],
+"contra": {
+"hepatic": [
+"warning",
+"Hepatic impairment: reduce dose/extend interval; avoid prolonged use."
+]
+},
+"mon": [
+"Count paracetamol from ALL sources (cold/flu products, suppositories)"
+],
+"ing": [
+"paracetamol"
+],
+"alg": [],
+"xalg": []
+},
+"ibuprofen": {
+"mgkg": [
+30,
+40
+],
+"abs": 2400,
+"freq": 4,
+"minage": [
+[
+3,
+"warning",
+"Not licensed under 3 months (or <5 kg)."
+]
+],
+"cls": [
+"nsaid"
+],
+"alg": [
+"nsaid"
+],
+"renal": [
+[
+30,
+"critical",
+"eGFR <30: avoid NSAIDs (acute kidney injury risk)."
+],
+[
+60,
+"warning",
+"Reduced eGFR: avoid or use lowest dose/shortest course; NSAIDs can precipitate AKI."
+]
+],
+"contra": {
+"asthma": [
+"warning",
+"Asthma: NSAIDs can trigger bronchospasm in sensitive patients; avoid if prior NSAID reaction."
+],
+"gi_bleed": [
+"critical",
+"GI bleeding/ulcer: avoid NSAIDs."
+],
+"dehydration": [
+"warning",
+"Dehydration raises NSAID kidney-injury risk; rehydrate first."
+]
+},
+"preg": [
+"warning",
+"Avoid from 20 weeks gestation (fetal kidney/ductus arteriosus risk); avoid in 3rd trimester."
+],
+"mon": [
+"Hydration and urine output",
+"Creatinine if used beyond 3-5 days or with other nephrotoxins"
+],
+"ing": [
+"ibuprofen"
+],
+"xalg": []
+},
+"diclofenac": {
+"mgkg": [
+2,
+3
+],
+"abs": 150,
+"freq": 3,
+"minage": [
+[
+12,
+"warning",
+"Oral diclofenac generally from 1 year; specialist advice below that."
+]
+],
+"cls": [
+"nsaid"
+],
+"alg": [
+"nsaid"
+],
+"renal": [
+[
+30,
+"critical",
+"eGFR <30: avoid NSAIDs (acute kidney injury risk)."
+],
+[
+60,
+"warning",
+"Reduced eGFR: avoid or use lowest dose/shortest course; NSAIDs can precipitate AKI."
+]
+],
+"contra": {
+"asthma": [
+"warning",
+"Asthma: NSAIDs can trigger bronchospasm in sensitive patients; avoid if prior NSAID reaction."
+],
+"gi_bleed": [
+"critical",
+"GI bleeding/ulcer: avoid NSAIDs."
+],
+"dehydration": [
+"warning",
+"Dehydration raises NSAID kidney-injury risk; rehydrate first."
+]
+},
+"preg": [
+"warning",
+"Avoid from 20 weeks gestation (fetal kidney/ductus arteriosus risk); avoid in 3rd trimester."
+],
+"mon": [
+"Hydration and urine output",
+"Creatinine if used beyond 3-5 days or with other nephrotoxins"
+],
+"ing": [
+"diclofenac"
+],
+"xalg": []
+},
+"aspirin": {
+"abs": 4000,
+"cls": [
+"nsaid"
+],
+"alg": [
+"nsaid"
+],
+"renal": [
+[
+30,
+"critical",
+"eGFR <30: avoid NSAIDs (acute kidney injury risk)."
+],
+[
+60,
+"warning",
+"Reduced eGFR: avoid or use lowest dose/shortest course; NSAIDs can precipitate AKI."
+]
+],
+"contra": {
+"asthma": [
+"critical",
+"Aspirin-sensitive asthma: avoid."
+],
+"gi_bleed": [
+"critical",
+"GI bleeding/ulcer: avoid NSAIDs."
+],
+"dehydration": [
+"warning",
+"Dehydration raises NSAID kidney-injury risk; rehydrate first."
+]
+},
+"preg": [
+"warning",
+"Avoid from 20 weeks gestation (fetal kidney/ductus arteriosus risk); avoid in 3rd trimester."
+],
+"mon": [
+"Hydration and urine output",
+"Creatinine if used beyond 3-5 days or with other nephrotoxins"
+],
+"bf": [
+"warning",
+"Avoid analgesic doses while breastfeeding; use paracetamol."
+],
+"minage": [
+[
+192,
+"critical",
+"Under 16: Reye syndrome risk. Avoid except specialist indications (Kawasaki disease, antiplatelet)."
+]
+],
+"ing": [
+"aspirin"
+],
+"xalg": []
+},
+"amoxicillin": {
+"ing": [
+"amoxicillin"
+],
+"cls": [
+"penicillin"
+],
+"alg": [
+"penicillin"
+],
+"mgkg": [
+50,
+90
+],
+"abs": 4000,
+"freq": 3,
+"renal": [
+[
+10,
+"warning",
+"CrCl <10: once-daily, reduced dose."
+],
+[
+30,
+"warning",
+"CrCl 10-30: give 12-hourly."
+]
+],
+"mon": [
+"Rash/anaphylaxis (first doses)",
+"Diarrhoea"
+],
+"xalg": []
+},
+"amoxicillin/clavulanate": {
+"ing": [
+"amoxicillin",
+"clavulanate"
+],
+"cls": [
+"penicillin"
+],
+"alg": [
+"penicillin"
+],
+"mgkg": [
+50,
+90
+],
+"abs": 3000,
+"freq": 3,
+"renal": [
+[
+30,
+"warning",
+"CrCl <30: adjust interval; avoid 875/125 strength."
+]
+],
+"contra": {
+"hepatic": [
+"warning",
+"Hepatic impairment: cholestatic jaundice risk; monitor LFTs."
+]
+},
+"mon": [
+"LFTs if course >14 days or liver disease",
+"Dose entered should be the AMOXICILLIN component"
+],
+"xalg": []
+},
+"azithromycin": {
+"cls": [
+"macrolide",
+"qt"
+],
+"alg": [
+"macrolide"
+],
+"mgkg": [
+10,
+12
+],
+"abs": 500,
+"freq": 1,
+"contra": {
+"cardiac": [
+"warning",
+"Known long QT/arrhythmia: this drug prolongs QT; consider an alternative."
+],
+"electrolyte": [
+"warning",
+"Low K/Mg raises QT/arrhythmia risk; correct first."
+],
+"hepatic": [
+"warning",
+"Hepatic impairment: caution; monitor LFTs."
+]
+},
+"mon": [
+"ECG if QT risk factors"
+],
+"ing": [
+"azithromycin"
+],
+"xalg": []
+},
+"clarithromycin": {
+"cls": [
+"macrolide",
+"qt",
+"cyp3a4_inh"
+],
+"alg": [
+"macrolide"
+],
+"mgkg": [
+15,
+24
+],
+"abs": 1000,
+"freq": 2,
+"renal": [
+[
+30,
+"warning",
+"CrCl <30: halve the dose."
+]
+],
+"contra": {
+"cardiac": [
+"warning",
+"Known long QT/arrhythmia: this drug prolongs QT; consider an alternative."
+],
+"electrolyte": [
+"warning",
+"Low K/Mg raises QT/arrhythmia risk; correct first."
+],
+"hepatic": [
+"warning",
+"Hepatic impairment: caution; monitor LFTs."
+]
+},
+"preg": [
+"warning",
+"Avoid in 1st trimester unless benefit outweighs risk."
+],
+"mon": [
+"ECG if QT risk factors or interacting drugs",
+"Many CYP3A4 interactions: review the full list"
+],
+"ing": [
+"clarithromycin"
+],
+"xalg": []
+},
+"erythromycin": {
+"cls": [
+"macrolide",
+"qt",
+"cyp3a4_inh"
+],
+"alg": [
+"macrolide"
+],
+"mgkg": [
+50,
+100
+],
+"abs": 4000,
+"freq": 4,
+"contra": {
+"cardiac": [
+"warning",
+"Known long QT/arrhythmia: this drug prolongs QT; consider an alternative."
+],
+"electrolyte": [
+"warning",
+"Low K/Mg raises QT/arrhythmia risk; correct first."
+],
+"hepatic": [
+"warning",
+"Hepatic impairment: caution (estolate is hepatotoxic)."
+]
+},
+"mon": [
+"ECG if QT risk factors"
+],
+"ing": [
+"erythromycin"
+],
+"xalg": []
+},
+"cefuroxime": {
+"cls": [
+"cephalosporin"
+],
+"alg": [
+"cephalosporin"
+],
+"xalg": [
+"penicillin"
+],
+"mgkg": [
+30,
+40
+],
+"abs": 1000,
+"freq": 2,
+"renal": [
+[
+30,
+"warning",
+"CrCl <30: extend interval."
+]
+],
+"mon": [
+"Rash/hypersensitivity",
+"Diarrhoea"
+],
+"ing": [
+"cefuroxime"
+]
+},
+"cefixime": {
+"cls": [
+"cephalosporin"
+],
+"alg": [
+"cephalosporin"
+],
+"xalg": [
+"penicillin"
+],
+"mgkg": [
+8,
+10
+],
+"abs": 400,
+"freq": 2,
+"renal": [
+[
+60,
+"warning",
+"Reduced renal function: dose reduction needed (see leaflet)."
+]
+],
+"mon": [
+"Rash",
+"Diarrhoea"
+],
+"ing": [
+"cefixime"
+]
+},
+"ceftriaxone": {
+"cls": [
+"cephalosporin"
+],
+"alg": [
+"cephalosporin"
+],
+"xalg": [
+"penicillin"
+],
+"mgkg": [
+80,
+100
+],
+"abs": 4000,
+"freq": 2,
+"minage": [
+[
+1,
+"warning",
+"Under 28 days: avoid if jaundiced/premature, and never with calcium-containing IV fluids."
+]
+],
+"mon": [
+"Biliary sludge/diarrhoea with long courses"
+],
+"ing": [
+"ceftriaxone"
+]
+},
+"meropenem": {
+"cls": [
+"carbapenem"
+],
+"alg": [
+"carbapenem"
+],
+"xalg": [
+"penicillin"
+],
+"mgkg": [
+60,
+120
+],
+"abs": 6000,
+"freq": 3,
+"renal": [
+[
+50,
+"warning",
+"Reduce dose/extend interval to eGFR."
+]
+],
+"contra": {
+"epilepsy": [
+"warning",
+"Seizure risk with carbapenems."
+]
+},
+"mon": [
+"Never with valproate",
+"CBC/LFT/renal if prolonged"
+],
+"ing": [
+"meropenem"
+]
+},
+"ciprofloxacin": {
+"cls": [
+"fluoroquinolone",
+"qt"
+],
+"alg": [
+"fluoroquinolone"
+],
+"mgkg": [
+30,
+40
+],
+"abs": 1500,
+"freq": 2,
+"minage": [
+[
+216,
+"warning",
+"Under 18: reserve for infections with no safe alternative (tendon/joint toxicity)."
+]
+],
+"renal": [
+[
+30,
+"warning",
+"CrCl <30: halve dose/extend interval."
+]
+],
+"contra": {
+"cardiac": [
+"warning",
+"Known long QT/arrhythmia: this drug prolongs QT; consider an alternative."
+],
+"electrolyte": [
+"warning",
+"Low K/Mg raises QT/arrhythmia risk; correct first."
+],
+"epilepsy": [
+"warning",
+"Lowers seizure threshold."
+],
+"g6pd": [
+"warning",
+"G6PD deficiency: haemolysis reported."
+],
+"diabetes": [
+"warning",
+"Dysglycaemia risk; monitor glucose."
+]
+},
+"preg": [
+"warning",
+"Avoid in pregnancy unless no alternative."
+],
+"mon": [
+"Stop and review if tendon pain/swelling"
+],
+"ing": [
+"ciprofloxacin"
+],
+"xalg": []
+},
+"metronidazole": {
+"mgkg": [
+30,
+50
+],
+"abs": 2400,
+"freq": 3,
+"contra": {
+"hepatic": [
+"warning",
+"Severe hepatic impairment: reduce dose ~50%."
+]
+},
+"preg": [
+"info",
+"Limited data; use only if clearly needed."
+],
+"bf": [
+"info",
+"Passes into milk; avoid high single doses (consider pausing feeds per leaflet)."
+],
+"mon": [
+"Neurological symptoms/neuropathy if prolonged",
+"No alcohol (adolescents): disulfiram-like reaction"
+],
+"ing": [
+"metronidazole"
+],
+"cls": [],
+"alg": [],
+"xalg": []
+},
+"sulfamethoxazole/trimethoprim": {
+"ing": [
+"sulfamethoxazole",
+"trimethoprim"
+],
+"alg": [
+"sulfonamide"
+],
+"mgkg": [
+12,
+20
+],
+"abs": 320,
+"freq": 2,
+"minage": [
+[
+2,
+"critical",
+"Under 2 months: kernicterus risk (PJP prophylaxis is the exception)."
+]
+],
+"renal": [
+[
+15,
+"critical",
+"CrCl <15: avoid unless monitored."
+],
+[
+30,
+"warning",
+"CrCl 15-30: halve the dose."
+]
+],
+"contra": {
+"g6pd": [
+"warning",
+"G6PD deficiency: haemolysis risk."
+],
+"hepatic": [
+"warning",
+"Severe hepatic impairment: avoid."
+]
+},
+"preg": [
+"warning",
+"Folate antagonist (1st trimester); kernicterus risk near term."
+],
+"mon": [
+"CBC, K+ and creatinine if prolonged/high dose",
+"Stop at first sign of rash (SJS/TEN)",
+"Dose entered should be the TRIMETHOPRIM component"
+],
+"cls": [],
+"xalg": []
+},
+"clindamycin": {
+"mgkg": [
+30,
+40
+],
+"abs": 1800,
+"freq": 4,
+"mon": [
+"Severe/bloody diarrhoea: stop and test for C. difficile"
+],
+"ing": [
+"clindamycin"
+],
+"cls": [],
+"alg": [],
+"xalg": []
+},
+"fluconazole": {
+"cls": [
+"azole",
+"qt",
+"cyp3a4_inh"
+],
+"mgkg": [
+6,
+12
+],
+"abs": 400,
+"freq": 1,
+"renal": [
+[
+50,
+"warning",
+"CrCl <50: halve the dose after loading."
+]
+],
+"contra": {
+"cardiac": [
+"warning",
+"Known long QT/arrhythmia: this drug prolongs QT; consider an alternative."
+],
+"electrolyte": [
+"warning",
+"Low K/Mg raises QT/arrhythmia risk; correct first."
+],
+"hepatic": [
+"warning",
+"Hepatotoxic: caution; monitor LFTs."
+]
+},
+"preg": [
+"warning",
+"Avoid, especially high doses/1st trimester."
+],
+"mon": [
+"LFTs if >2 weeks or high dose",
+"ECG if QT risk factors"
+],
+"ing": [
+"fluconazole"
+],
+"alg": [],
+"xalg": []
+},
+"acyclovir": {
+"mgkg": [
+80,
+100
+],
+"abs": 4000,
+"freq": 5,
+"renal": [
+[
+10,
+"warning",
+"CrCl <10: reduce dose and frequency."
+],
+[
+25,
+"warning",
+"CrCl 10-25: reduce frequency (8-12 hourly)."
+]
+],
+"contra": {
+"dehydration": [
+"warning",
+"Dehydration raises crystal nephropathy risk; hydrate."
+]
+},
+"mon": [
+"Hydration and renal function (esp. IV/high dose)"
+],
+"ing": [
+"acyclovir"
+],
+"cls": [],
+"alg": [],
+"xalg": []
+},
+"oseltamivir": {
+"mgkg": [
+6,
+7
+],
+"abs": 150,
+"freq": 2,
+"renal": [
+[
+30,
+"warning",
+"CrCl <30: once-daily dosing."
+],
+[
+60,
+"warning",
+"CrCl 30-60: halve the dose."
+]
+],
+"mon": [
+"Neuropsychiatric symptoms (agitation, confusion)"
+],
+"ing": [
+"oseltamivir"
+],
+"cls": [],
+"alg": [],
+"xalg": []
+},
+"domperidone": {
+"mgkg": [
+0.75,
+1.0
+],
+"abs": 30,
+"freq": 3,
+"renal": [
+[
+30,
+"warning",
+"Severe renal impairment: reduce frequency and monitor."
+]
+],
+"contra": {
+"cardiac": [
+"critical",
+"Long QT/cardiac disease: contraindicated (EU label)."
+],
+"electrolyte": [
+"critical",
+"Electrolyte disturbance: contraindicated (EU label)."
+],
+"hepatic": [
+"critical",
+"Moderate/severe hepatic impairment: contraindicated."
+],
+"gi_bleed": [
+"critical",
+"GI haemorrhage/obstruction: contraindicated."
+]
+},
+"mon": [
+"Nausea/vomiting only, lowest dose, shortest course (usually <=1 week)",
+"ECG and K/Mg if risk factors"
+],
+"ing": [
+"domperidone"
+],
+"cls": [],
+"alg": [],
+"xalg": []
+},
+"ondansetron": {
+"cls": [
+"qt"
+],
+"mgkg": [
+0.45,
+0.6
+],
+"abs": 24,
+"freq": 3,
+"minage": [
+[
+1,
+"warning",
+"Not established under 1 month."
+]
+],
+"contra": {
+"cardiac": [
+"warning",
+"Known long QT/arrhythmia: this drug prolongs QT; consider an alternative."
+],
+"electrolyte": [
+"warning",
+"Low K/Mg raises QT/arrhythmia risk; correct first."
+],
+"hepatic": [
+"warning",
+"Severe hepatic impairment: max 8 mg/day."
+]
+},
+"preg": [
+"info",
+"1st-trimester use linked to a small increase in oral clefts in some studies."
+],
+"mon": [
+"ECG if QT risk factors"
+],
+"ing": [
+"ondansetron"
+],
+"alg": [],
+"xalg": []
+},
+"salbutamol": {
+"cls": [
+"hypok"
+],
+"contra": {
+"cardiac": [
+"warning",
+"Tachyarrhythmia risk at high doses."
+],
+"electrolyte": [
+"warning",
+"Lowers potassium."
+],
+"diabetes": [
+"info",
+"High doses can raise glucose/ketones."
+]
+},
+"mon": [
+"Heart rate and K+ with frequent/high-dose use",
+"Needing it often means poor control: review"
+],
+"ing": [
+"salbutamol"
+],
+"alg": [],
+"xalg": []
+},
+"montelukast": {
+"ageabs": [
+[
+6,
+4
+],
+[
+15,
+5
+],
+[
+200,
+10
+]
+],
+"freq": 1,
+"minage": [
+[
+6,
+"warning",
+"Not licensed under 6 months."
+]
+],
+"contra": {
+"psychiatric": [
+"warning",
+"Boxed warning for neuropsychiatric events; use only if benefit outweighs risk."
+]
+},
+"mon": [
+"Mood, sleep, behaviour changes (stop if they occur)"
+],
+"ing": [
+"montelukast"
+],
+"cls": [],
+"alg": [],
+"xalg": []
+},
+"cetirizine": {
+"cls": [
+"antihistamine"
+],
+"ageabs": [
+[
+6,
+5
+],
+[
+200,
+10
+]
+],
+"freq": 2,
+"minage": [
+[
+6,
+"warning",
+"Not licensed under 6 months."
+]
+],
+"renal": [
+[
+30,
+"warning",
+"CrCl <30: halve the dose."
+]
+],
+"contra": {
+"hepatic": [
+"warning",
+"Hepatic impairment: halve the dose."
+]
+},
+"mon": [
+"Drowsiness"
+],
+"ing": [
+"cetirizine"
+],
+"alg": [],
+"xalg": []
+},
+"loratadine": {
+"cls": [
+"antihistamine"
+],
+"abs": 10,
+"freq": 1,
+"minage": [
+[
+24,
+"warning",
+"Not licensed under 2 years."
+]
+],
+"renal": [
+[
+30,
+"warning",
+"GFR <30: alternate-day/reduced dose."
+]
+],
+"contra": {
+"hepatic": [
+"warning",
+"Hepatic impairment: reduce dose."
+]
+},
+"mon": [
+"Max 5 mg/day if weight <=30 kg"
+],
+"ing": [
+"loratadine"
+],
+"alg": [],
+"xalg": []
+},
+"chlorpheniramine": {
+"cls": [
+"antihistamine",
+"sedating_ah"
+],
+"ageabs": [
+[
+6,
+6
+],
+[
+12,
+12
+],
+[
+200,
+24
+]
+],
+"freq": 4,
+"minage": [
+[
+24,
+"critical",
+"Under 2 years: do not use."
+],
+[
+72,
+"warning",
+"OTC cough/cold products not advised under 6 years."
+]
+],
+"contra": {
+"asthma": [
+"warning",
+"Thickens secretions: avoid during acute asthma."
+]
+},
+"mon": [
+"Sedation / paradoxical excitation / anticholinergic effects"
+],
+"ing": [
+"chlorpheniramine"
+],
+"alg": [],
+"xalg": []
+},
+"prednisolone": {
+"mgkg": [
+2,
+3
+],
+"abs": 80,
+"freq": 3,
+"cls": [
+"corticosteroid",
+"hypok"
+],
+"contra": {
+"diabetes": [
+"warning",
+"Diabetes: expect hyperglycaemia; monitor glucose."
+],
+"gi_bleed": [
+"warning",
+"GI bleed/ulcer: avoid or add gastroprotection."
+],
+"active_infection": [
+"warning",
+"Untreated systemic infection: steroids may worsen/mask it."
+],
+"psychiatric": [
+"warning",
+"Psychiatric history: steroids can cause mood/behaviour change."
+]
+},
+"mon": [
+"BP, glucose, mood/behaviour",
+"If >2 weeks: growth and adrenal suppression (do not stop abruptly)",
+"Avoid live vaccines on high-dose/prolonged courses"
+],
+"ing": [
+"prednisolone"
+],
+"alg": [],
+"xalg": []
+},
+"dexamethasone": {
+"mgkg": [
+0.6,
+1.0
+],
+"abs": 16,
+"freq": 4,
+"cls": [
+"corticosteroid",
+"hypok"
+],
+"contra": {
+"diabetes": [
+"warning",
+"Diabetes: expect hyperglycaemia; monitor glucose."
+],
+"gi_bleed": [
+"warning",
+"GI bleed/ulcer: avoid or add gastroprotection."
+],
+"active_infection": [
+"warning",
+"Untreated systemic infection: steroids may worsen/mask it."
+],
+"psychiatric": [
+"warning",
+"Psychiatric history: steroids can cause mood/behaviour change."
+]
+},
+"mon": [
+"BP, glucose, mood/behaviour",
+"If >2 weeks: growth and adrenal suppression (do not stop abruptly)",
+"Avoid live vaccines on high-dose/prolonged courses"
+],
+"ing": [
+"dexamethasone"
+],
+"alg": [],
+"xalg": []
+},
+"omeprazole": {
+"cls": [
+"ppi"
+],
+"mgkg": [
+2,
+3.5
+],
+"abs": 80,
+"freq": 2,
+"contra": {
+"hepatic": [
+"info",
+"Severe hepatic impairment: max 20 mg/day."
+]
+},
+"mon": [
+"Review need at 8 weeks; Mg and B12 if long-term"
+],
+"ing": [
+"omeprazole"
+],
+"alg": [],
+"xalg": []
+},
+"carbamazepine": {
+"cls": [
+"antiepileptic",
+"cyp3a4_ind"
+],
+"mgkg": [
+30,
+35
+],
+"abs": 1200,
+"freq": 4,
+"contra": {
+"hepatic": [
+"warning",
+"Hepatic dysfunction: caution; monitor LFTs."
+],
+"cardiac": [
+"critical",
+"AV conduction block: contraindicated."
+]
+},
+"preg": [
+"warning",
+"Neural tube/malformation risk: folic acid, specialist review, do not stop abruptly."
+],
+"mon": [
+"Levels, CBC, sodium, LFTs",
+"HLA-B*1502 screening in at-risk ancestry before starting (SJS/TEN)",
+"Stop at first sign of rash"
+],
+"ing": [
+"carbamazepine"
+],
+"alg": [],
+"xalg": []
+},
+"valproate": {
+"cls": [
+"antiepileptic"
+],
+"mgkg": [
+40,
+60
+],
+"abs": 2500,
+"freq": 3,
+"minage": [
+[
+24,
+"warning",
+"Under 2 years: highest hepatotoxicity risk; specialist use only, avoid polytherapy."
+]
+],
+"contra": {
+"hepatic": [
+"critical",
+"Liver disease: contraindicated."
+],
+"metabolic": [
+"critical",
+"Mitochondrial (POLG)/urea-cycle disorder: contraindicated."
+]
+},
+"preg": [
+"critical",
+"Major teratogen with neurodevelopmental harm: contraindicated unless no alternative and pregnancy-prevention programme met."
+],
+"mon": [
+"LFTs, platelets/clotting, weight",
+"Ammonia if drowsy/vomiting",
+"Pregnancy test/contraception in females of childbearing age"
+],
+"ing": [
+"valproate"
+],
+"alg": [],
+"xalg": []
+},
+"diazepam": {
+"cls": [
+"benzo"
+],
+"freq": 4,
+"minage": [
+[
+6,
+"warning",
+"Oral diazepam not recommended under 6 months."
+]
+],
+"contra": {
+"hepatic": [
+"warning",
+"Hepatic impairment: reduce dose; avoid in severe."
+]
+},
+"preg": [
+"warning",
+"Late pregnancy: neonatal sedation/withdrawal."
+],
+"bf": [
+"warning",
+"Infant sedation: avoid repeated doses."
+],
+"mon": [
+"Sedation and respiratory rate, especially with other CNS depressants"
+],
+"ing": [
+"diazepam"
+],
+"alg": [],
+"xalg": []
+},
+"warfarin": {
+"cls": [
+"anticoag"
+],
+"freq": 1,
+"contra": {
+"gi_bleed": [
+"critical",
+"Active GI bleed/ulcer: avoid."
+],
+"hepatic": [
+"warning",
+"Altered INR response; monitor closely."
+]
+},
+"preg": [
+"critical",
+"Warfarin embryopathy: contraindicated (specialist switch, e.g. LMWH)."
+],
+"mon": [
+"INR after ANY new drug/diet change",
+"Bleeding signs"
+],
+"ing": [
+"warfarin"
+],
+"alg": [],
+"xalg": []
+},
+"furosemide": {
+"cls": [
+"hypok"
+],
+"mgkg": [
+4,
+6
+],
+"abs": 600,
+"freq": 4,
+"contra": {
+"electrolyte": [
+"warning",
+"Worsens hypokalaemia/hyponatraemia."
+],
+"dehydration": [
+"warning",
+"Hypovolaemia: avoid until corrected."
+]
+},
+"preg": [
+"warning",
+"Use only if clearly needed."
+],
+"mon": [
+"Na, K, creatinine, urine output",
+"Ototoxicity risk at high doses"
+],
+"ing": [
+"furosemide"
+],
+"alg": [],
+"xalg": []
+}
+};
+const INT = [["warfarin", "nsaid", "critical", "Major bleeding risk (antiplatelet effect + GI injury). Avoid; use paracetamol."], ["warfarin", "fluconazole", "critical", "Markedly raises INR (CYP2C9 inhibition). Avoid, or reduce warfarin with close INR monitoring."], ["warfarin", "metronidazole", "critical", "Markedly raises INR. Avoid, or reduce warfarin with close INR monitoring."], ["warfarin", "sulfamethoxazole/trimethoprim", "critical", "Markedly raises INR/bleeding risk."], ["warfarin", "macrolide", "warning", "Can raise INR. Check INR within 3-5 days."], ["warfarin", "ciprofloxacin", "warning", "Can raise INR. Monitor INR."], ["warfarin", "carbamazepine", "warning", "Induces warfarin metabolism (lower INR). Monitor INR."], ["warfarin", "paracetamol", "warning", "Regular paracetamol can raise INR. Monitor if used regularly."], ["warfarin", "corticosteroid", "warning", "May alter INR and adds GI bleeding risk."], ["domperidone", "qt", "critical", "Contraindicated with QT-prolonging drugs (EU label): torsades risk."], ["domperidone", "cyp3a4_inh", "critical", "CYP3A4 inhibitors raise domperidone levels: contraindicated (EU label)."], ["qt", "qt", "warning", "Additive QT prolongation/torsades risk. Check ECG and K/Mg; avoid if possible."], ["carbamazepine", "cyp3a4_inh", "critical", "Can cause carbamazepine toxicity (ataxia, diplopia, vomiting). Avoid or monitor levels."], ["carbamazepine", "valproate", "warning", "Two-way interaction (CBZ-epoxide up, valproate down). Monitor levels."], ["carbamazepine", "corticosteroid", "warning", "Carbamazepine reduces corticosteroid effect (CYP3A4 induction)."], ["carbamazepine", "diazepam", "warning", "Carbamazepine lowers diazepam levels."], ["valproate", "meropenem", "critical", "Carbapenems collapse valproate levels -> seizures. Do not co-prescribe."], ["diazepam", "fluconazole", "warning", "Fluconazole raises diazepam levels: sedation."], ["diazepam", "omeprazole", "warning", "Omeprazole raises diazepam levels: sedation."], ["benzo", "sedating_ah", "warning", "Additive sedation/respiratory depression."], ["ciprofloxacin", "corticosteroid", "warning", "Raised tendon rupture risk with corticosteroids."], ["ciprofloxacin", "nsaid", "warning", "NSAIDs + fluoroquinolones raise seizure risk."], ["nsaid", "corticosteroid", "warning", "Additive GI bleeding/ulcer risk; consider gastroprotection."], ["nsaid", "furosemide", "warning", "NSAIDs blunt diuretic effect and raise AKI risk."], ["nsaid", "sulfamethoxazole/trimethoprim", "warning", "Additive renal injury/hyperkalaemia risk."], ["hypok", "hypok", "warning", "Additive hypokalaemia (steroid, salbutamol, loop diuretic). Monitor K+."]];
+const DUP = {"nsaid": "critical", "antihistamine": "warning", "ppi": "warning", "benzo": "warning", "macrolide": "warning", "penicillin": "warning", "cephalosporin": "warning", "corticosteroid": "warning"};
+const SEV = {critical: 3, warning: 2, info: 1};
+
+const normEg = s => String(s).toLowerCase().replace(/[\s\-_.]+/g, "");
+const EG_INDEX = new Map();   // normalized name -> [generic key, matched brand or null]
+for (const [g, v] of Object.entries(EG_DATA)) {
+  EG_INDEX.set(normEg(g), [g, null]);
+  EG_INDEX.set(normEg(v.us), [g, null]);
+  if (v.ar) EG_INDEX.set(normEg(v.ar), [g, null]);
+}
+for (const [g, v] of Object.entries(EG_DATA)) for (const b of v.brands) EG_INDEX.set(normEg(b), [g, b]);  // brands win collisions
+const resolveEgypt = name => EG_INDEX.get(normEg(name)) || [null, null];
+const allSearchNames = () => {
+  const s = new Set();
+  for (const [g, v] of Object.entries(EG_DATA)) { s.add(g); v.brands.forEach(b => s.add(b)); }
+  return [...s].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+};
+
+/* ===== Prescriptions Safety Checker engine (client-side port of safety_check) ===== */
+for (const v of Object.values(SAFE)) { v.ing = v.ing || null; v.cls = v.cls || []; v.alg = v.alg || []; v.xalg = v.xalg || []; }
+for (const k of Object.keys(SAFE)) if (!SAFE[k].ing) SAFE[k].ing = [k];
+const n2 = s => String(s).toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]/g, "");
+const SAFE_IDX = {};
+for (const k of Object.keys(SAFE)) {
+  SAFE_IDX[n2(k)] = k;
+  const e = EG_DATA[k];
+  if (e) for (const x of [e.us, e.ar, ...e.brands]) if (x) SAFE_IDX[n2(x)] = k;
+}
+SAFE_IDX["acetaminophen"] = "paracetamol"; SAFE_IDX["albuterol"] = "salbutamol";
+function resolveMed(text) {
+  for (const c of [text, ...String(text).split(/[\s,()]+/)]) {
+    const n = n2(c);
+    if (n.length >= 3 && Object.prototype.hasOwnProperty.call(SAFE_IDX, n)) return SAFE_IDX[n];
+  }
+  return null;
+}
+const numOrNull = x => { const v = parseFloat(x); return (isNaN(v) || v < 0) ? null : v; };
+const fmtG = x => String(parseFloat(Number(x).toPrecision(6)));
+const inter = (arr, set) => arr.filter(x => set.has(x));
+
+function safetyCheck(p) {
+  const F = [], MON = [];
+  const add = (sev, cat, drugs, msg) => F.push({sev, cat, drugs, msg});
+  const a = numOrNull(p.age);
+  const mult = {y: 12, m: 1, d: 1 / 30.44}[p.age_unit || "y"] || 12;
+  const ageM = a === null ? null : a * mult;
+  const ageY = ageM === null ? null : ageM / 12;
+  const wt = numOrNull(p.weight), ht = numOrNull(p.height), scr = numOrNull(p.scr);
+  let egfr = numOrNull(p.egfr);
+  const female = p.sex === "f";
+  let renalNote = "entered";
+  if (egfr === null && scr && ageY !== null) {
+    if (ageY < 18 && ht) { egfr = 0.413 * ht / scr; renalNote = "bedside Schwartz, mL/min/1.73m2" + (ageY < 1 ? " (unreliable under 1 year)" : ""); }
+    else if (ageY >= 18 && wt) { egfr = (140 - ageY) * wt / (72 * scr) * (female ? 0.85 : 1); renalNote = "Cockcroft-Gault, mL/min"; }
+  }
+  const status = (female && ageY !== null && ageY >= 10) ? (p.pregnancy || "") : "";
+  const conds = new Set(p.conditions || []);
+  const alg = new Set(p.allergies || []);
+  for (const t of String(p.allergy_text || "").slice(0, 300).split(/[,;\n]+/)) {
+    const k = t.trim() ? resolveMed(t.trim()) : null;
+    if (k) { alg.add("drug:" + k); SAFE[k].alg.forEach(x => alg.add(x)); }
+  }
+  const meds = [];
+  for (const m of (p.meds || []).slice(0, 20)) {
+    const name = String(m.name || "").trim().slice(0, 80);
+    if (!name) continue;
+    const k = resolveMed(name);
+    meds.push({name, key: k, dose: numOrNull(m.dose), freq: numOrNull(m.freq)});
+    if (!k) add("info", "Not screened", [name], "Not in the checker's database: it was NOT screened. Check it manually.");
+  }
+  const known = meds.filter(m => m.key);
+  const lab = m => n2(m.name) === n2(m.key) ? m.name : m.name + " (" + m.key + ")";
+
+  for (const m of known) {
+    const d = SAFE[m.key], L = lab(m), dose = m.dose, freq = m.freq;
+    if (dose && freq) {
+      const day = dose * freq;
+      if (d.freq && freq > d.freq) add("critical", "Dose", [L], fmtG(freq) + " doses/day exceeds the usual maximum of " + d.freq + "/day.");
+      if (d.mgkg && wt) {
+        const mk = day / wt, lo = d.mgkg[0], hi = d.mgkg[1];
+        if (mk > hi) add("critical", "Dose", [L], mk.toFixed(1) + " mg/kg/day is above the maximum of " + fmtG(hi) + " mg/kg/day. Possible dosing error.");
+        else if (mk > lo) add("warning", "Dose", [L], mk.toFixed(1) + " mg/kg/day is above the usual maximum of " + fmtG(lo) + " (upper limit " + fmtG(hi) + ", severe infection/specialist use).");
+      }
+      if (d.abs && day > d.abs) add("warning", "Dose", [L], fmtG(day) + " mg/day exceeds the usual absolute maximum of " + fmtG(d.abs) + " mg/day.");
+      for (const [up, mx] of (d.ageabs || [])) {
+        if (ageY !== null && ageY < up) {
+          if (day > mx) add("critical", "Dose", [L], fmtG(day) + " mg/day exceeds the maximum of " + fmtG(mx) + " mg/day for this age.");
+          break;
+        }
+      }
+    } else if (dose || freq) {
+      add("info", "Dose", [L], "Enter both dose (mg) and times/day to check the dose.");
+    }
+    if (ageM !== null) for (const [mo, sev, msg] of (d.minage || [])) if (ageM < mo) { add(sev, "Age", [L], msg); break; }
+    if (egfr !== null) for (const [thr, sev, msg] of (d.renal || [])) if (egfr < thr) { add(sev, "Renal", [L], "eGFR " + egfr.toFixed(0) + ": " + msg); break; }
+    for (const [c, [sev, msg]] of Object.entries(d.contra || {})) if (conds.has(c)) add(sev, "Contraindication", [L], msg);
+    if (status === "pregnant" && d.preg) add(d.preg[0], "Pregnancy", [L], d.preg[1]);
+    else if (status === "unknown" && d.preg && d.preg[0] !== "info") add("warning", "Pregnancy", [L], "Pregnancy status unknown: " + d.preg[1] + " Test before prescribing.");
+    else if (status === "breastfeeding" && d.bf) add(d.bf[0], "Pregnancy", [L], "Breastfeeding: " + d.bf[1]);
+    const drugHit = alg.has("drug:" + m.key), classHit = inter(d.alg, alg).sort();
+    if (drugHit || classHit.length) add("critical", "Allergy", [L], "Documented allergy: matches " + (drugHit ? m.key : classHit.join("/") + " class") + ". Do not give.");
+    else { const x = inter(d.xalg, alg).sort(); if (x.length) add("warning", "Allergy", [L], "Cross-reactivity with " + x.join("/") + " allergy (about 1-2%, higher for similar side chains). Weigh benefit; give first dose under observation."); }
+    if (d.mon && d.mon.length) MON.push({drug: L, items: d.mon});
+  }
+
+  for (let i = 0; i < known.length; i++) for (let j = i + 1; j < known.length; j++) {
+    const A = known[i], B = known[j], da = SAFE[A.key], db = SAFE[B.key], pair = [lab(A), lab(B)];
+    if (A.key === B.key) { add("critical", "Duplicate", pair, "Same drug entered twice (different brands?): risk of double dosing."); continue; }
+    const ov = da.ing.filter(x => db.ing.includes(x)).sort();
+    if (ov.length) { add("critical", "Duplicate", pair, "Duplicate active ingredient: " + ov.join(", ") + "."); continue; }
+    for (const c of new Set(da.cls.filter(x => db.cls.includes(x)))) if (DUP[c]) add(DUP[c], "Duplicate", pair, "Therapeutic duplication (two " + c.replace(/_/g, " ") + "). Confirm this is intended.");
+    const ta = new Set([A.key, ...da.cls]), tb = new Set([B.key, ...db.cls]);
+    for (const [x, y, sev, msg] of INT) if ((ta.has(x) && tb.has(y)) || (ta.has(y) && tb.has(x))) add(sev, "Interaction", pair, msg);
+  }
+
+  if (meds.length && known.length) {
+    if (known.some(m => m.dose && m.freq) && wt === null) add("info", "Missing data", [], "Weight not entered: mg/kg dose checks were skipped.");
+    const rn = known.filter(m => SAFE[m.key].renal).map(lab);
+    if (rn.length && egfr === null) add("info", "Missing data", rn, "Renal function not entered: these drugs need renal dose checks.");
+    const pg = known.filter(m => SAFE[m.key].preg && SAFE[m.key].preg[0] !== "info").map(lab);
+    if (pg.length && female && ageY !== null && ageY >= 10 && !status) add("info", "Missing data", pg, "Pregnancy status not entered: these drugs carry pregnancy warnings.");
+    if (ageY === null) add("info", "Missing data", [], "Age not entered: age limits and age-based maximums were skipped.");
+  }
+  F.sort((x, y) => SEV[y.sev] - SEV[x.sev]);
+  return {findings: F, monitoring: MON, egfr: egfr === null ? null : Number(egfr.toFixed(1)), renal_note: renalNote};
+}
+
+/* ===== Prescriptions Safety Checker ===== */
+const SC_ALG = [["penicillin","Penicillin"],["cephalosporin","Cephalosporin"],["sulfonamide","Sulfonamide"],["nsaid","NSAID / aspirin"],["macrolide","Macrolide"],["fluoroquinolone","Fluoroquinolone"],["carbapenem","Carbapenem"]];
+const SC_CON = [["asthma","Asthma"],["hepatic","Hepatic impairment"],["epilepsy","Epilepsy"],["cardiac","Long QT / arrhythmia / heart block"],["gi_bleed","GI bleed / ulcer"],["dehydration","Dehydration"],["electrolyte","Low K / Mg"],["diabetes","Diabetes"],["g6pd","G6PD deficiency"],["metabolic","Mitochondrial / urea-cycle disorder"],["psychiatric","Psychiatric history"],["active_infection","Untreated systemic infection"]];
+const scChips = (id, arr) => $(id).innerHTML = arr.map(a => '<label class="chip" style="cursor:pointer;text-transform:none;letter-spacing:0"><input type="checkbox" value="' + a[0] + '" style="width:auto;margin:0 6px 0 0;vertical-align:middle">' + esc(a[1]) + '</label>').join("");
+const scChecked = id => [...document.querySelectorAll("#" + id + " input:checked")].map(x => x.value);
+function scAddRow() {
+  if (document.querySelectorAll(".sc-row").length >= 15) return;
+  const d = document.createElement("div");
+  d.className = "row sc-row"; d.style.marginBottom = "6px";
+  d.innerHTML = '<input class="sc-name" type="text" list="x_list" placeholder="Drug (generic or brand)" autocomplete="off" style="flex:1;min-width:180px">' +
+    '<input class="sc-dose" type="number" min="0" step="any" placeholder="mg / dose" style="width:110px">' +
+    '<input class="sc-freq" type="number" min="0" step="any" placeholder="times / day" style="width:110px">' +
+    '<button class="go" style="background:transparent;color:var(--warn);border:1px solid var(--warn);padding:8px 12px" onclick="this.parentNode.remove()" aria-label="Remove">&times;</button>';
+  $("sc_meds").appendChild(d);
+}
+function scPreg() {
+  const a = parseFloat($("sc_age").value), u = $("sc_unit").value;
+  const yrs = isNaN(a) ? NaN : (u === "y" ? a : u === "m" ? a / 12 : a / 365);
+  $("sc_pregbox").hidden = !($("sc_sex").value === "f" && yrs >= 10);
+}
+async function scRun() {
+  const out = $("sc_out");
+  const meds = [...document.querySelectorAll(".sc-row")].map(r => ({name: r.querySelector(".sc-name").value, dose: r.querySelector(".sc-dose").value, freq: r.querySelector(".sc-freq").value})).filter(m => m.name.trim());
+  if (!meds.length) { out.innerHTML = '<span class="warn">Add at least one medication.</span>'; return; }
+  const body = {age: $("sc_age").value, age_unit: $("sc_unit").value, weight: $("sc_wt").value, height: $("sc_ht").value, sex: $("sc_sex").value,
+    pregnancy: $("sc_pregbox").hidden ? "" : $("sc_preg").value, egfr: $("sc_egfr").value, scr: $("sc_scr").value,
+    allergies: scChecked("sc_alg"), allergy_text: $("sc_algtxt").value, conditions: scChecked("sc_con"), meds: meds};
+  $("sc_btn").disabled = true; out.innerHTML = '<span style="color:var(--muted)">Checking...</span>';
+  try {
+    const d = safetyCheck(body);
+    const col = {critical: "var(--warn)", warning: "var(--amber)", info: "var(--accent)"}, lbl = {critical: "Critical", warning: "Warning", info: "Note"};
+    const n = s => d.findings.filter(f => f.sev === s).length;
+    let h = '<div style="margin:6px 0 10px;font-weight:700">' + ["critical","warning","info"].map(s => '<span style="color:' + col[s] + ';margin-right:14px">' + n(s) + ' ' + lbl[s].toLowerCase() + '</span>').join("") + '</div>';
+    if (d.egfr !== null) h += '<div style="font-size:13px;color:var(--muted);margin-bottom:8px">eGFR used: <b style="color:var(--ink)">' + d.egfr + '</b> (' + esc(d.renal_note) + ')</div>';
+    if (!d.findings.length) h += '<div class="xsec" style="padding:10px 14px">No issues found by the rules in this checker. This does not prove the prescription is safe.</div>';
+    h += d.findings.map(f => '<div style="border-left:4px solid ' + col[f.sev] + ';background:var(--card-hover);border-radius:8px;padding:8px 12px;margin:6px 0"><div style="font-size:12px;font-weight:700;color:' + col[f.sev] + '">' + lbl[f.sev].toUpperCase() + ' &middot; ' + esc(f.cat) + (f.drugs.length ? ' &middot; ' + f.drugs.map(esc).join(' + ') : '') + '</div><div>' + esc(f.msg) + '</div></div>').join("");
+    if (d.monitoring.length) h += '<details class="xsec green" open style="margin-top:12px"><summary>Required monitoring</summary><div class="xbody">' + d.monitoring.map(m => '<b>' + esc(m.drug) + '</b><ul class="bl">' + m.items.map(i => '<li>' + esc(i) + '</li>').join("") + '</ul>').join("") + '</div></details>';
+    h += '<p style="font-size:12px;color:var(--muted);margin:12px 0 0">Decision support only, from a curated starter rule set that covers a limited number of common drugs and interactions. Unlisted drugs are not screened. Always confirm against the product leaflet, local protocol and a pharmacist.</p>';
+    out.innerHTML = h;
+  } catch (e) { out.innerHTML = '<span class="warn">Check failed. Please review the entries and try again.</span>'; }
+  finally { $("sc_btn").disabled = false; }
+}
+scChips("sc_alg", SC_ALG); scChips("sc_con", SC_CON); scAddRow(); scAddRow(); scAddRow();
+
+// datalist of Egyptian generic + brand names for the drug boxes
+$("x_list").innerHTML = allSearchNames().map(n => '<option value="' + esc(n) + '"></option>').join("");
 
 /* ===== Vitals & GCS ===== */
 function setVTab(t) {
