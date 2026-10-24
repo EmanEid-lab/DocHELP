@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f8fafc">
-<title>DocHELP | Clinical Toolkit</title>
+<title>DocHELP | Clinical Pediatric Toolkit</title>
 <meta name="description" content="DocHELP: paediatric dosing, transfusion, drug interaction, vaccination and vitals tools.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%E2%9A%95%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <style>
@@ -392,6 +392,21 @@
   }
 
 
+  /* ---- Global search ---- */
+  .hero-search { position: relative; margin-top: 16px; max-width: 580px; }
+  .hero-search input { width: 100%; padding: 12px 14px 12px 42px; font-size: 15px; border-radius: 12px; }
+  .gs-ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; opacity: 0.7; }
+  .gs-res { display: none; position: absolute; left: 0; right: 0; top: calc(100% + 6px); background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 14px 34px rgba(0,0,0,0.2); z-index: 80; max-height: 360px; overflow-y: auto; }
+  .gs-res.open { display: block; }
+  .gs-it { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 10px 14px; cursor: pointer; font-size: 14px; }
+  .gs-it:hover, .gs-it.active { background: var(--accent-light); }
+  .gs-g { font-size: 11px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+  .gs-none { padding: 12px 14px; color: var(--muted); font-size: 14px; }
+  .gs-ex { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+  .gs-exl { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .gs-chip { font-size: 12.5px; font-weight: 600; font-family: inherit; color: var(--accent); background: var(--bg); border: 1px solid var(--line); padding: 4px 11px; border-radius: 999px; cursor: pointer; }
+  .gs-chip:hover { background: var(--accent-light); border-color: var(--accent); }
+
   /* ---- Clinical Decision Tool ---- */
   .tool-card.clinical { --card-border: #6366f1; }
   .cdt-wrap { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 16px; align-items: start; margin-top: 14px; }
@@ -571,10 +586,21 @@
       <div class="eyebrow" id="greet">Welcome</div>
       <h2>DocHELP Clinical Toolkit</h2>
       <p>Instant clinical calculations, resuscitation reference, FDA interaction cross-checking, and routine vaccination guidelines.</p>
-      <div class="hero-chips">
-        <span class="hero-chip">&#9889; Fast, weight-based</span>
-        <span class="hero-chip">&#127760; Live openFDA data</span>
-        <span class="hero-chip">&#128241; Mobile friendly</span>
+      <div class="hero-search">
+        <span class="gs-ico" aria-hidden="true">&#128269;</span>
+        <input id="gs_q" type="search" placeholder="Search every tool: drugs, calculators, conditions, vaccines..." autocomplete="off" aria-label="Search all tools" role="combobox" aria-controls="gs_res" aria-expanded="false">
+        <div id="gs_res" class="gs-res" role="listbox"></div>
+      </div>
+      <div class="gs-ex" id="gs_ex">
+        <span class="gs-exl">Quick examples:</span>
+        <button type="button" class="gs-chip" data-q="paracetamol">paracetamol</button>
+        <button type="button" class="gs-chip" data-q="CURB-65">CURB-65</button>
+        <button type="button" class="gs-chip" data-q="sepsis">sepsis</button>
+        <button type="button" class="gs-chip" data-q="anion gap">anion gap</button>
+        <button type="button" class="gs-chip" data-q="BCG">BCG</button>
+        <button type="button" class="gs-chip" data-q="chads">CHA&#8322;DS&#8322;-VASc score</button>
+        <button type="button" class="gs-chip" data-q="DKA">DKA</button>
+        <button type="button" class="gs-chip" data-q="fluids">fluids</button>
       </div>
     </div>
     <div>
@@ -3921,6 +3947,7 @@ setHeaderH();
   panel.addEventListener("input", run); panel.addEventListener("change", run);
   window.cdtReset = () => select(cur.id);
   window.cdtOpen = select;
+  window.CDT_INDEX = CALCS.map(c => ({id: c.id, title: c.title, group: c.group, blurb: c.blurb}));
   select(CALCS[0].id);
 })();
 
@@ -4160,9 +4187,76 @@ setHeaderH();
   q.addEventListener("input", renderList);
   nav.addEventListener("click", e => { const b = e.target.closest("button[data-id]"); if (b) show(b.dataset.id); });
   window.glOpen = show;
+  window.GL_INDEX = D.map(d => ({id: d.id, n: d.n, sp: SP[d.sp], k: d.k}));
   show(D[0].id);
 })();
 
+/* ===== Global search (Home) ===== */
+(function () {
+  const inp = document.getElementById("gs_q"), box = document.getElementById("gs_res");
+  if (!inp || !box) return;
+  const nz = s => String(s).normalize("NFKD").toLowerCase().replace(/[\u0300-\u036f]/g, "");
+  const E = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  let IDX = null, hits = [], act = -1;
+
+  function build() {
+    const a = [];
+    const add = (t, g, k, fn, low) => a.push({t, g, fn, low: !!low, n: nz(t), k: nz(k || ""), h: nz(t + " " + g + " " + (k || ""))});
+    const tab = (s, t) => () => goTab(s, t);
+    const D = "Paediatric Dosing";
+    add("Drug dose calculator", D, "mg/kg weight based preset single dose daily maximum concentration volume mL", tab("dosing", "drug"));
+    add("Custom formula", D, "expression equation advanced weight age height", tab("dosing", "formula"));
+    add("Emergency / resuscitation", D, "cardiac arrest adrenaline epinephrine amiodarone atropine defibrillation lorazepam seizure dextrose hypoglycaemia ETT intubation fluid bolus", tab("dosing", "emerg"));
+    add("Fluids", D, "maintenance bolus dehydration deficit 4-2-1 holliday segar", tab("dosing", "fluids"));
+    add("Weight / BSA / eGFR", D, "body surface area weight estimate schwartz kidney function creatinine", tab("dosing", "body"));
+    add("FDA label lookup (paediatric dosing for any drug)", D, "openFDA dailymed label pediatric use dosage administration", () => { goTab("dosing", "drug"); setTimeout(() => { const e = document.getElementById("fda_q"); if (e) { e.scrollIntoView({block: "center"}); e.focus(); } }, 80); });
+    if (typeof PRESETS !== "undefined") for (const k of Object.keys(PRESETS)) add(PRESETS[k].name + " preset", D, k + " drug dose preset " + PRESETS[k].rng, () => { goTab("dosing", "drug"); const s = document.getElementById("d_preset"); s.value = k; applyPreset(); });
+    add("Transfusion guide", "Transfusion Guide", "blood PRBC packed red cells platelets FFP plasma cryoprecipitate volume", () => goScreen("transfusion"));
+    add("Drug interactions (FDA label scanner)", "Drug Interactions", "openFDA contraindications boxed warning interaction generic brand", () => goScreen("interactions"));
+    add("Prescriptions Safety Checker", "Safety Checker", "allergy duplicate interaction dose error renal pregnancy contraindication monitoring multiple medications prescription", () => goScreen("safety"));
+    add("Egyptian immunization schedule", "Immunization", "vaccines Ministry of Health routine childhood", () => goScreen("vaccines"));
+    if (typeof VACCINE_DATA !== "undefined") VACCINE_DATA.forEach(v => add(v.name + " (" + v.age + ")", "Immunization", v.desc + " " + v.route, () => goScreen("vaccines")));
+    add("Vital signs check", "Vitals & GCS", "heart rate respiratory rate blood pressure age normal range", tab("vitals", "vitals"));
+    add("Paediatric Glasgow Coma Scale", "Vitals & GCS", "gcs coma consciousness eye verbal motor", tab("vitals", "gcs"));
+    const ALIAS = {chads: "chads cha2ds2vasc atrial fibrillation af stroke anticoagulation", hasbled: "hasbled bleeding risk anticoagulation", gcs: "gcs coma consciousness adult", renal: "crcl cockcroft gault ckd-epi egfr gfr kidney schwartz", bmi: "bmi bsa body mass index body surface area mosteller", casod: "corrected calcium sodium hyperglycaemia albumin", agosm: "ag anion gap osmolar gap delta ratio acidosis", wellsdvt: "dvt deep vein thrombosis leg", wellspe: "pe pulmonary embolism", curb: "curb65 pneumonia severity", apache: "apache 2 apache ii icu mortality", pdose: "mg/kg dose weight based", maint: "iv fluids 4-2-1 holliday segar", drip: "drip rate drops per minute giving set", drug: "infusion pump mcg/kg/min inotrope"};
+    (window.CDT_INDEX || []).forEach(c => add(c.title, "Clinical Decision Tool", c.group + " " + c.blurb + " " + (ALIAS[c.id] || ""), () => { showScreen("clinical"); cdtOpen(c.id); closeSidebarMobile(); }));
+    (window.GL_INDEX || []).forEach(c => add(c.n, "Diseases & Guidelines", c.sp + " " + c.k, () => { showScreen("guidelines"); glOpen(c.id); closeSidebarMobile(); }));
+    if (typeof allSearchNames === "function") allSearchNames().forEach(nm => add(nm, "Drug Interactions", "drug brand generic Egyptian", () => { goScreen("interactions"); const x = document.getElementById("x_name"); x.value = nm; if (typeof lookupDrug === "function") lookupDrug(); }, true));
+    return a;
+  }
+
+  function search() {
+    const toks = nz(inp.value).split(/\s+/).filter(Boolean);
+    act = -1;
+    if (!toks.length) { box.classList.remove("open"); box.innerHTML = ""; return; }
+    if (!IDX) IDX = build();
+    hits = IDX.map(e => {
+      if (!toks.every(t => e.h.indexOf(t) >= 0)) return null;
+      let s = 0;
+      for (const t of toks) s += e.n.indexOf(t) === 0 ? 4 : e.n.indexOf(t) > 0 ? 3 : e.k.indexOf(t) >= 0 ? 2 : 1;
+      return {e, s: s - (e.low ? 2 : 0)};
+    }).filter(Boolean).sort((x, y) => y.s - x.s).slice(0, 12).map(x => x.e);
+    box.innerHTML = hits.length ? hits.map((e, i) => '<div class="gs-it" role="option" data-i="' + i + '"><span>' + E(e.t) + '</span><span class="gs-g">' + E(e.g) + '</span></div>').join("") : '<div class="gs-none">No matching tool, calculator, condition or drug. Try another word.</div>';
+    box.classList.add("open");
+  }
+  function pick(i) {
+    const e = hits[i]; if (!e) return;
+    inp.value = ""; box.classList.remove("open"); box.innerHTML = ""; hits = [];
+    e.fn(); window.scrollTo(0, 0);
+  }
+  function mark() { box.querySelectorAll(".gs-it").forEach((el, i) => { el.classList.toggle("active", i === act); if (i === act) el.scrollIntoView({block: "nearest"}); }); }
+  inp.addEventListener("input", search);
+  inp.addEventListener("focus", () => { if (inp.value.trim()) search(); });
+  inp.addEventListener("keydown", e => {
+    if (e.key === "ArrowDown") { e.preventDefault(); if (hits.length) { act = (act + 1) % hits.length; mark(); } }
+    else if (e.key === "ArrowUp") { e.preventDefault(); if (hits.length) { act = (act - 1 + hits.length) % hits.length; mark(); } }
+    else if (e.key === "Enter") { e.preventDefault(); pick(act >= 0 ? act : 0); }
+    else if (e.key === "Escape") { box.classList.remove("open"); inp.blur(); }
+  });
+  box.addEventListener("mousedown", e => { const el = e.target.closest(".gs-it"); if (el) { e.preventDefault(); pick(+el.dataset.i); } });
+  document.getElementById("gs_ex").addEventListener("click", e => { const b = e.target.closest(".gs-chip"); if (b) { inp.value = b.dataset.q; inp.focus(); search(); } });
+  document.addEventListener("click", e => { if (!e.target.closest(".hero-search, .gs-ex")) box.classList.remove("open"); });
+})();
 showScreen("home");
 </script>
 </body>
