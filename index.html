@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#f8fafc">
-<title>DocHELP | Clinical Pediatric Toolkit</title>
+<title>DocHELP | Clinical Toolkit</title>
 <meta name="description" content="DocHELP: paediatric dosing, transfusion, drug interaction, vaccination and vitals tools.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%E2%9A%95%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <style>
@@ -716,6 +716,12 @@
       <div id="d_info" class="cdt-hint" style="margin:10px 0"></div>
       <button class="go" onclick="calcDrug()">Calculate</button>
       <div class="out" id="d_out"></div>
+      <div class="card" style="margin-top:18px;padding:16px">
+        <b>FDA label lookup: paediatric dosing for any FDA-labelled drug</b>
+        <div class="cdt-hint" style="margin:4px 0 8px">Live from the FDA drug label database. Presets above cover common drugs; use this for everything else, then enter the confirmed dose in the calculator.</div>
+        <div class="row"><input id="fda_q" type="text" placeholder="e.g. cetirizine, montelukast, cefdinir, Zyrtec" autocomplete="off" onkeydown="if(event.key==='Enter')fdaPeds()"><button class="go" onclick="fdaPeds()">Look up</button></div>
+        <div class="out" id="fda_out"></div>
+      </div>
       <ul class="note">
         <li>Presets are editable starting points only (beyond neonatal period).</li>
         <li>Always confirm age band, organ function, and current hospital formulary.</li>
@@ -1121,6 +1127,54 @@ function calcDrug() {
   flags.forEach(f => items.push(["Notice", f, "bad"]));
   if (!flags.length) items.push(["Status", "Within standard entered maximums", "good"]);
   $("d_out").innerHTML = bl(items);
+}
+
+/* ===== FDA label lookup for paediatric dosing (live from openFDA) ===== */
+const PEDS_RX = /pediatric|paediatric|children|child\b|infant|neonat|adolescent|newborn|mg\/kg|per kg|\/kg/i;
+function fdaPedsExtract(label) {
+  const clean = x => String(Array.isArray(x) ? x.join(" ") : (x || "")).replace(/\s+/g, " ").trim();
+  const dose = clean(label.dosage_and_administration).replace(/([.!?])\s+(?=[A-Z(\[0-9])/g, "$1\u0001").split("\u0001").map(s => s.trim()).filter(s => s.length > 12 && PEDS_RX.test(s));
+  const peds = clean(label.pediatric_use), box = clean(label.boxed_warning);
+  const o = ofdaOf(label);
+  return {
+    dose: dose.slice(0, 14).map(s => s.length > 420 ? s.slice(0, 420) + "..." : s),
+    peds: peds ? (peds.length > 900 ? peds.slice(0, 900) + "..." : peds) : "",
+    box: box ? (box.length > 500 ? box.slice(0, 500) + "..." : box) : "",
+    generic: (o.generic_name || []).slice(0, 2).join(", "), brand: (o.brand_name || []).slice(0, 3).join(", "),
+    setid: label.set_id || "", date: label.effective_time ? label.effective_time.replace(/^(\d{4})(\d{2})(\d{2})$/, "$1-$2-$3") : ""
+  };
+}
+function ofdaOf(l) { return l.openfda || {}; }
+
+async function fdaPeds() {
+  const raw = $("fda_q").value.trim().replace(/["\\]/g, " ").slice(0, 80), out = $("fda_out");
+  if (raw.length < 2) { out.innerHTML = '<span class="warn">Enter a drug name.</span>'; return; }
+  let term = raw;
+  try {
+    if (typeof resolveEgypt === "function") { const k = resolveEgypt(raw)[0]; if (k) term = EG_DATA[k].us; }
+    if (typeof US_ALIASES !== "undefined" && US_ALIASES[raw.toLowerCase()]) term = US_ALIASES[raw.toLowerCase()];
+  } catch (e) {}
+  out.innerHTML = '<span class="muted">Searching the FDA label database...</span>';
+  try {
+    const q = 'openfda.generic_name:"' + term + '" OR openfda.brand_name:"' + term + '" OR openfda.substance_name:"' + term + '"';
+    const resp = await fetch("https://api.fda.gov/drug/label.json?search=" + encodeURIComponent(q) + "&limit=15");
+    if (resp.status === 404) { out.innerHTML = '<span class="warn">No FDA label found for "' + esc(raw) + '". Try the generic name; the drug may not be FDA-approved.</span>'; return; }
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    const res = (await resp.json()).results || [];
+    const ex = res.map(fdaPedsExtract).sort((a, b) => (b.dose.length + (b.peds ? 1 : 0)) - (a.dose.length + (a.peds ? 1 : 0)))[0];
+    if (!ex) { out.innerHTML = '<span class="warn">No label content returned.</span>'; return; }
+    let h = '<h4 style="margin:0 0 4px">' + esc(ex.generic || raw) + (ex.brand ? ' <span class="muted">(' + esc(ex.brand) + ')</span>' : "") + '</h4>';
+    if (term.toLowerCase() !== raw.toLowerCase()) h += '<div class="cdt-hint">Searched as "' + esc(term) + '" (US name).</div>';
+    if (ex.box) h += '<p><b class="warn">Boxed warning:</b> ' + esc(ex.box) + '</p>';
+    h += '<b>Paediatric dosing statements in the Dosage and Administration section</b>';
+    h += ex.dose.length ? '<ul class="bl">' + ex.dose.map(s => '<li>' + esc(s) + '</li>').join("") + '</ul>' : '<p class="muted">No paediatric dosing text found in this label. See Pediatric use below and the full label.</p>';
+    if (ex.peds) h += '<b>Pediatric use</b><p>' + esc(ex.peds) + '</p>';
+    h += '<div class="cdt-hint">FDA label' + (ex.date ? " effective " + esc(ex.date) : "") + '. ' + (ex.setid ? '<a href="https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=' + encodeURIComponent(ex.setid) + '" target="_blank" rel="noopener noreferrer">Open the full label on DailyMed &#8599;</a>. ' : "") +
+      'Excerpts are filtered automatically and may omit context (indication, age band, formulation): always read the full label. US labelling can differ from the product registered in your country. Enter the mg/kg dose you confirm into the calculator above.</div>';
+    out.innerHTML = h;
+  } catch (e) {
+    out.innerHTML = '<span class="warn">Could not reach the FDA database. Check your internet connection and try again.</span>';
+  }
 }
 
 function safeEval(expr, vars) {
