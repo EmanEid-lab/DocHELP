@@ -564,8 +564,10 @@
   }
 
   @media (max-width: 768px) {
-    /* navigation: bottom bar replaces the sidebar */
-    #sidebar, #sbOverlay, .menu-btn { display: none !important; }
+    /* navigation: slide-out sidebar (same menu as desktop, opened from the header button) plus the bottom bar */
+    #sidebar { padding-bottom: calc(24px + env(safe-area-inset-bottom)); overscroll-behavior: contain; }
+    body.sb-open { overflow: hidden; }
+    .brand-group > div:last-child { min-width: 0; }
     .mnav { --mc: #bfe3ff; --mb: #9fcdf5; display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; background: linear-gradient(var(--mb), var(--mb)) top / 100% 1px no-repeat, linear-gradient(var(--mc), var(--mc)) top / 100% 70px no-repeat; padding: 0 10px env(safe-area-inset-bottom); pointer-events: none; }
     .mnav button { pointer-events: auto; flex: 1; min-width: 0; border: 0; background: none; color: #35506b; font: inherit; font-size: 11px; font-weight: 600; padding: 0; margin: 8px 3px; min-height: 54px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; }
     .mnav button.on { color: #075985; background: rgba(255, 255, 255, 0.75); }
@@ -3662,13 +3664,17 @@ function updateSidebar() {
   if (window.mNavSync) window.mNavSync();
 }
 
+function syncMenuAria() {
+  const m = $("menuBtn");
+  if (m) m.setAttribute("aria-expanded", String(SB_MOBILE() ? document.body.classList.contains("sb-open") : !document.body.classList.contains("sb-collapsed")));
+}
 function toggleSidebar() {
-  if (SB_MOBILE()) { document.body.classList.toggle("sb-open"); return; }
+  if (SB_MOBILE()) { document.body.classList.toggle("sb-open"); syncMenuAria(); return; }
   const collapsed = document.body.classList.toggle("sb-collapsed");
   try { localStorage.setItem("Dr.Help_sidebar", collapsed ? "closed" : "open"); } catch (e) {}
-  setHeaderH();
+  setHeaderH(); syncMenuAria();
 }
-function closeSidebarMobile() { document.body.classList.remove("sb-open"); }
+function closeSidebarMobile() { document.body.classList.remove("sb-open"); syncMenuAria(); }
 function goScreen(name) { showScreen(name); closeSidebarMobile(); }
 function goTab(screen, tab) {
   showScreen(screen);
@@ -3683,7 +3689,18 @@ function setHeaderH() {
 window.addEventListener("resize", () => { setHeaderH(); if (!SB_MOBILE()) closeSidebarMobile(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeSidebarMobile(); });
 try { if (localStorage.getItem("Dr.Help_sidebar") === "closed") document.body.classList.add("sb-collapsed"); } catch (e) {}
-setHeaderH();
+setHeaderH(); syncMenuAria();
+/* phones: swipe left on the open sidebar to close it */
+(function () {
+  let sx = null, sy = 0;
+  document.addEventListener("touchstart", e => { const t = e.touches[0]; sx = document.body.classList.contains("sb-open") ? t.clientX : null; sy = t.clientY; }, {passive: true});
+  document.addEventListener("touchend", e => {
+    if (sx === null) return;
+    const t = e.changedTouches[0];
+    if (t.clientX - sx < -60 && Math.abs(t.clientY - sy) < 60) closeSidebarMobile();
+    sx = null;
+  }, {passive: true});
+})();
 
 
 /* ===== Clinical Decision Tool: calculators and validated scores ===== */
