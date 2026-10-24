@@ -2,7 +2,7 @@
 <html lang="en" data-theme="auto">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f8fafc">
 <title>DocHELP | Clinical Pediatric Toolkit</title>
 <meta name="description" content="DocHELP: paediatric dosing, transfusion, drug interaction, vaccination and vitals tools.">
@@ -523,6 +523,72 @@
     }
     body.sb-open #sidebar { transform: none; }
     body.sb-open #sbOverlay { display: block; }
+  }
+
+  /* ===== Mobile-only refinements (desktop untouched) ===== */
+  @media (hover: none) {
+    .tool-card:hover { transform: none; box-shadow: var(--shadow); }
+  }
+
+  @media (max-width: 900px) {
+    #sidebar { height: 100dvh; width: min(84vw, 300px); }
+    .sb-item { padding: 12px 10px; }
+    .sb-sub  { padding: 10px 12px; font-size: 14px; }
+  }
+
+  @media (max-width: 600px) {
+    /* stop iOS zoom-on-focus and enlarge tap targets */
+    input, select, textarea { font-size: 16px; min-height: 44px; }
+    input[type="checkbox"] { min-height: 0; }
+    button.go, .back-btn, .theme-toggle, .menu-btn { min-height: 44px; }
+
+    /* header: compact */
+    header { padding: 8px 12px; padding-top: max(8px, env(safe-area-inset-top)); }
+    .brand-group { gap: 8px; min-width: 0; }
+    .logo-icon { display: none; }
+    header h1 { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 48vw; }
+    .back-btn { padding: 8px 10px; }
+
+    /* layout */
+    .container { padding: 12px 12px calc(32px + env(safe-area-inset-bottom)); }
+    .hero { padding: 18px 14px; border-radius: 14px; }
+    .hero-text h2 { font-size: 20px; }
+    .hero-search { max-width: 100%; }
+    .gs-ex { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+    .gs-chip, .gs-exl { flex: none; }
+    .tools-grid { grid-template-columns: 1fr; gap: 12px; }
+    .tool-card { padding: 16px; }
+    .card, .panel, .vpanel, #cdt_panel, .gl-panel { padding: 14px; }
+    .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+    /* tabs become a swipeable strip */
+    nav#tabs, nav#vtabs { flex-wrap: nowrap; overflow-x: auto; gap: 6px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    nav#tabs button, nav#vtabs button { flex: none; white-space: nowrap; border-radius: 8px; }
+
+    /* rows: stack, override inline widths */
+    .row { align-items: stretch; }
+    .row > * { flex: 1 1 100%; }
+    .row input, .row select { width: 100% !important; min-width: 0 !important; }
+    .row button.go { width: 100%; }
+    .sc-row { display: grid !important; grid-template-columns: 1fr 1fr 44px; gap: 8px; }
+    .sc-row > * { flex: none; }
+    .sc-row .sc-name { grid-column: 1 / -1; }
+    .age-row select { width: 96px !important; }
+
+    /* Clinical Tool menu: horizontal chips instead of a long list */
+    #cdt_nav { display: flex !important; overflow-x: auto; gap: 6px; padding: 8px; -webkit-overflow-scrolling: touch; }
+    #cdt_nav .cdt-grp { display: flex; gap: 6px; flex: none; align-items: center; }
+    #cdt_nav .cdt-gl { display: none; }
+    #cdt_nav button { width: auto; white-space: nowrap; border: 1px solid var(--line); }
+    #gl_nav { max-height: 240px; }
+
+    /* tables and results scroll sideways instead of breaking the page */
+    .out, #v_vitals, .xbody { overflow-x: auto; }
+    table { min-width: 460px; }
+    .cdt-hv { font-size: 20px; }
+    .score-big { font-size: 34px; }
+    .xsec .xbody { max-height: 320px; }
+    .gs-res { max-height: 50vh; }
   }
 </style>
 </head>
