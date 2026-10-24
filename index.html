@@ -525,7 +525,17 @@
     body.sb-open #sbOverlay { display: block; }
   }
 
-  /* ===== Mobile-only refinements (desktop untouched) ===== */
+  /* ===== Mobile app layout (768px and below). Desktop is unchanged. ===== */
+  .mnav, .m-back, .m-acc { display: none; }
+  .out { scroll-margin-top: 72px; }
+  .mlist { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+  .mrow { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+  .mrow:last-child { border-bottom: 0; }
+  .mrow:hover { background: var(--card-hover); }
+  .mrow .mt { flex: 1; font-size: 15px; font-weight: 600; }
+  .mrow .mt small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
+  .mrow .mch { color: var(--muted); font-size: 22px; line-height: 1; }
+
   @media (hover: none) {
     .tool-card:hover { transform: none; box-shadow: var(--shadow); }
   }
@@ -536,34 +546,50 @@
     .sb-sub  { padding: 10px 12px; font-size: 14px; }
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 768px) {
+    /* navigation: bottom bar replaces the sidebar */
+    #sidebar, #sbOverlay, .menu-btn { display: none !important; }
+    .mnav { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; background: var(--header-bg); backdrop-filter: blur(8px); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+    .mnav button { flex: 1; border: 0; background: none; color: var(--muted); font: inherit; font-size: 11px; font-weight: 600; padding: 8px 0 7px; min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; }
+    .mnav button.on { color: var(--accent); }
+    .mnav svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
     /* stop iOS zoom-on-focus and enlarge tap targets */
     input, select, textarea { font-size: 16px; min-height: 44px; }
     input[type="checkbox"] { min-height: 0; }
-    button.go, .back-btn, .theme-toggle, .menu-btn { min-height: 44px; }
+    button.go, .back-btn, .theme-toggle { min-height: 44px; }
 
     /* header: compact */
     header { padding: 8px 12px; padding-top: max(8px, env(safe-area-inset-top)); }
     .brand-group { gap: 8px; min-width: 0; }
     .logo-icon { display: none; }
-    header h1 { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 48vw; }
+    header h1 { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 52vw; }
     .back-btn { padding: 8px 10px; }
 
     /* layout */
-    .container { padding: 12px 12px calc(32px + env(safe-area-inset-bottom)); }
-    .hero { padding: 18px 14px; border-radius: 14px; }
-    .hero-text h2 { font-size: 20px; }
-    .hero-search { max-width: 100%; }
-    .gs-ex { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
-    .gs-chip, .gs-exl { flex: none; }
-    .tools-grid { grid-template-columns: 1fr; gap: 12px; }
-    .tool-card { padding: 16px; }
+    .container { padding: 12px 12px calc(84px + env(safe-area-inset-bottom)); }
     .card, .panel, .vpanel, #cdt_panel, .gl-panel { padding: 14px; }
     .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 
+    /* home: search first, compact two-column tiles */
+    .hero { padding: 14px; border-radius: 14px; margin-bottom: 16px; }
+    .hero-text h2, .hero-text p, .hero > div:last-child { display: none; }
+    .hero { display: block; }
+    .hero-text { min-width: 0; max-width: 100%; }
+    .hero-search { max-width: 100%; margin-top: 10px; }
+    .gs-ex { max-width: 100%; }
+    .gs-ex { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .gs-chip, .gs-exl { flex: none; }
+    .tools-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tool-card { padding: 14px; gap: 4px; border-radius: 14px; }
+    .tool-icon { width: 40px; height: 40px; font-size: 22px; border-radius: 12px; margin-bottom: 8px; }
+    .tool-title { font-size: 15px; }
+    #screen-home .tool-desc, #screen-home .tool-cta, #screen-home .contact-section { display: none; }
+    .tool-card:hover { transform: none; }
+
     /* tabs become a swipeable strip */
     nav#tabs, nav#vtabs { flex-wrap: nowrap; overflow-x: auto; gap: 6px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-    nav#tabs button, nav#vtabs button { flex: none; white-space: nowrap; border-radius: 8px; }
+    nav#tabs button, nav#vtabs button { flex: none; white-space: nowrap; border-radius: 8px; min-height: 40px; }
 
     /* rows: stack, override inline widths */
     .row { align-items: stretch; }
@@ -575,20 +601,57 @@
     .sc-row .sc-name { grid-column: 1 / -1; }
     .age-row select { width: 96px !important; }
 
-    /* Clinical Tool menu: horizontal chips instead of a long list */
-    #cdt_nav { display: flex !important; overflow-x: auto; gap: 6px; padding: 8px; -webkit-overflow-scrolling: touch; }
-    #cdt_nav .cdt-grp { display: flex; gap: 6px; flex: none; align-items: center; }
-    #cdt_nav .cdt-gl { display: none; }
-    #cdt_nav button { width: auto; white-space: nowrap; border: 1px solid var(--line); }
-    #gl_nav { max-height: 240px; }
+    /* primary action stays reachable above the bottom bar */
+    .panel > button.go, #screen-transfusion .card > button.go { position: sticky; bottom: calc(66px + env(safe-area-inset-bottom)); width: 100%; z-index: 20; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22); }
+
+    /* safety checker: collapsible steps */
+    .m-hide { display: none; }
+    .m-acc { display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: 8px 0; font-weight: 600; font-size: 15px; cursor: pointer; border-bottom: 1px solid var(--line); margin-bottom: 10px; }
+    .m-acc::after { content: ""; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); transition: transform 0.2s ease; }
+    .m-sec.closed .m-acc::after { transform: rotate(-45deg); }
+    .m-sec.closed .m-acc { margin-bottom: 0; }
+    .m-sec.closed .m-body { display: none; }
+
+    /* calculators and guidelines: list first, then detail with a back button */
+    .cdt-wrap { margin-top: 0; }
+    #cdt_nav, #gl_nav { position: static; max-height: none; padding: 4px 12px; }
+    #cdt_nav button, #gl_nav button { padding: 13px 4px; font-size: 15px; border-radius: 0; border-bottom: 1px solid var(--line); min-height: 48px; }
+    #gl_q { margin: 8px 0; }
+    .m-back { display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--card); color: var(--accent); padding: 10px 14px; border-radius: 10px; font: inherit; font-weight: 600; font-size: 14px; margin-bottom: 10px; min-height: 44px; cursor: pointer; }
+    #screen-clinical:not(.m-detail) .m-back, #screen-guidelines:not(.m-detail) .m-back { display: none; }
+    #screen-clinical:not(.m-detail) #cdt_panel, #screen-guidelines:not(.m-detail) #gl_panel { display: none; }
+    #screen-clinical.m-detail #cdt_nav, #screen-guidelines.m-detail #gl_nav { display: none; }
 
     /* tables and results scroll sideways instead of breaking the page */
-    .out, #v_vitals, .xbody { overflow-x: auto; }
-    table { min-width: 460px; }
+    .out, .xbody { overflow-x: auto; }
+    #screen-vaccines table, #v_vitals table { min-width: 460px; }
     .cdt-hv { font-size: 20px; }
     .score-big { font-size: 34px; }
     .xsec .xbody { max-height: 320px; }
     .gs-res { max-height: 50vh; }
+  }
+
+  .m-search, .msheet { display: none; }
+  .m-acc .m-n { margin-left: auto; margin-right: 10px; font-style: normal; font-size: 12px; font-weight: 600; color: var(--accent); }
+  @media (max-width: 768px) {
+    .m-search { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 10px; font-size: 18px; cursor: pointer; }
+    .hdr-controls { gap: 8px; display: flex; align-items: center; }
+    #hSub, #themeLabel { display: none; }
+    .theme-toggle { padding: 0; width: 44px; justify-content: center; }
+    #sc_sec_pat .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; }
+    #sc_sec_pat .row > div { min-width: 0; }
+    #sc_sec_pat .row > div:has(#sc_age), #sc_sec_pat .row > div:not(:has(input, select)) { grid-column: 1 / -1; }
+    #sc_sec_pat .row > div:has(#sc_age) .row { grid-template-columns: 1fr 1fr; }
+    .sc-row { border: 1px solid var(--line); border-radius: 12px; padding: 10px; background: var(--bg); }
+    .card .row:has(#sc_btn) { position: sticky; bottom: calc(66px + env(safe-area-inset-bottom)); z-index: 20; }
+    .card .row:has(#sc_btn) .go { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22); }
+    .msheet:not([hidden]) { display: block; position: fixed; inset: 0; z-index: 200; background: rgba(15, 23, 42, 0.5); }
+    .msheet-panel { position: absolute; left: 0; right: 0; bottom: 0; max-height: 82vh; overflow-y: auto; background: var(--bg); border-radius: 18px 18px 0 0; padding: 14px 14px calc(18px + env(safe-area-inset-bottom)); }
+    .msheet-grab { width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: 0 auto 12px; }
+    .msheet h4 { margin: 4px 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    .msheet .mico { font-size: 22px; width: 32px; text-align: center; }
+    .msheet-foot { margin: 14px 2px 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .msheet-foot a { color: var(--accent); text-decoration: none; }
   }
 </style>
 </head>
@@ -605,6 +668,7 @@
     </div>
   </div>
   <div class="hdr-controls">
+    <button type="button" class="m-search" onclick="mSearch()" aria-label="Search all tools">&#128269;</button>
     <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()" title="Switch dark/light mode">
       <span id="themeIcon">&#127769;</span>
       <span id="themeLabel">Theme</span>
@@ -641,6 +705,27 @@
   </div>
 </aside>
 <div id="sbOverlay" onclick="closeSidebarMobile()"></div>
+<nav class="mnav" aria-label="Main">
+  <button type="button" data-m="home" onclick="mGo('home')"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</button>
+  <button type="button" data-m="dosing" onclick="mGo('dosing')"><svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-35 12 12)"/><path d="M9.5 8.5l6 6" transform="rotate(0)"/></svg>Dosing</button>
+  <button type="button" data-m="safety" onclick="mGo('safety')"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Safety</button>
+  <button type="button" data-m="clinical" onclick="mGo('clinical')"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2"/></svg>Tools</button>
+  <button type="button" data-m="more" onclick="mMore(true)"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>More</button>
+</nav>
+<div id="mMore" class="msheet" hidden onclick="if(event.target===this)mMore(false)">
+  <div class="msheet-panel" role="dialog" aria-label="More tools">
+    <div class="msheet-grab"></div>
+    <h4>More tools</h4>
+    <div class="mlist">
+      <button type="button" class="mrow" onclick="mGo('transfusion')"><span class="mico">&#129656;</span><span class="mt">Transfusion Guide<small>Component volumes and rates</small></span><span class="mch">&#8250;</span></button>
+      <button type="button" class="mrow" onclick="mGo('interactions')"><span class="mico">&#9879;&#65039;</span><span class="mt">Drug Interactions<small>FDA labels, Egyptian brands</small></span><span class="mch">&#8250;</span></button>
+      <button type="button" class="mrow" onclick="mGo('vaccines')"><span class="mico">&#128137;</span><span class="mt">Egyptian Immunization<small>MOHP routine schedule</small></span><span class="mch">&#8250;</span></button>
+      <button type="button" class="mrow" onclick="mGo('guidelines')"><span class="mico">&#129658;</span><span class="mt">Diseases &amp; Guidelines<small>Red flags and emergency care first</small></span><span class="mch">&#8250;</span></button>
+      <button type="button" class="mrow" onclick="mGo('vitals')"><span class="mico">&#128200;</span><span class="mt">Vitals &amp; GCS<small>Age-based ranges, paediatric GCS</small></span><span class="mch">&#8250;</span></button>
+    </div>
+    <p class="msheet-foot"><b>Dr. Eman Eid</b> &middot; <a href="mailto:EmanEid228@gmail.com">EmanEid228@gmail.com</a><br>DocHELP is a decision-support aid and does not replace clinical judgement. Always verify doses against your local protocols and current formulary.</p>
+  </div>
+</div>
 <div class="content">
 <div class="container">
 
@@ -919,7 +1004,8 @@ w*0.01
 <!-- PRESCRIPTIONS SAFETY CHECKER SCREEN -->
 <div id="screen-safety" class="screen" hidden>
   <div class="card">
-    <b>Patient</b>
+    <div class="m-sec" id="sc_sec_pat"><div class="m-acc" onclick="this.parentNode.classList.toggle('closed')"><span>Patient</span></div><div class="m-body">
+    <b class="m-hide">Patient</b>
     <div class="row" style="margin-top:8px">
       <div><label>Age</label><div class="row" style="gap:4px"><input id="sc_age" type="number" min="0" step="any" style="width:90px" oninput="scPreg()">
         <select id="sc_unit" style="width:95px" onchange="scPreg()"><option value="y">years</option><option value="m">months</option><option value="d">days</option></select></div></div>
@@ -934,9 +1020,14 @@ w*0.01
       <div><label>Serum creatinine (mg/dL)</label><input id="sc_scr" type="number" min="0" step="any" style="width:150px"></div>
       <div style="font-size:12px;color:var(--muted);flex:1;min-width:200px;padding-bottom:8px">With creatinine, eGFR is estimated by bedside Schwartz (needs height, under 18) or Cockcroft-Gault (needs weight, 18+).</div>
     </div>
-    <div style="margin-top:14px"><b>Allergies</b><div id="sc_alg" style="margin-top:6px"></div>
+    </div></div>
+    <div class="m-sec" id="sc_sec_alg"><div class="m-acc" onclick="this.parentNode.classList.toggle('closed')"><span>Allergies</span><em class="m-n" id="sc_n_alg"></em></div><div class="m-body">
+    <div style="margin-top:14px"><b class="m-hide">Allergies</b><div id="sc_alg" style="margin-top:6px"></div>
       <input id="sc_algtxt" type="text" placeholder="Other drug allergies, comma separated (generic or brand)" style="margin-top:6px;width:100%"></div>
-    <div style="margin-top:14px"><b>Conditions</b><div id="sc_con" style="margin-top:6px"></div></div>
+    </div></div>
+    <div class="m-sec" id="sc_sec_con"><div class="m-acc" onclick="this.parentNode.classList.toggle('closed')"><span>Conditions</span><em class="m-n" id="sc_n_con"></em></div><div class="m-body">
+    <div style="margin-top:14px"><b class="m-hide">Conditions</b><div id="sc_con" style="margin-top:6px"></div></div>
+    </div></div>
   </div>
   <div class="card">
     <b>Medications</b> <span style="font-size:12px;color:var(--muted)">(dose in mg per dose; use the amoxicillin component for amoxicillin/clavulanate and trimethoprim for co-trimoxazole)</span>
@@ -1001,6 +1092,7 @@ w*0.01
 <!-- CLINICAL DECISION TOOL SCREEN -->
 <div id="screen-clinical" class="screen" hidden>
   <div class="cdt-wrap">
+    <button type="button" class="m-back" onclick="mBack('clinical')">&#8592; All calculators</button>
     <div id="cdt_nav" aria-label="Calculators"></div>
     <div id="cdt_panel"></div>
   </div>
@@ -1009,6 +1101,7 @@ w*0.01
 <!-- DISEASES & CLINICAL GUIDELINES SCREEN -->
 <div id="screen-guidelines" class="screen" hidden>
   <div class="cdt-wrap">
+    <button type="button" class="m-back" onclick="mBack('guidelines')">&#8592; All conditions</button>
     <div id="gl_nav">
       <input id="gl_q" type="search" placeholder="Search condition or specialty" autocomplete="off" aria-label="Search conditions">
       <div id="gl_list"></div>
@@ -1143,6 +1236,7 @@ function showScreen(name) {
   $("hSub").textContent = SCREENS[name][1];
   $("backBtn").hidden = (name === "home");
   currentScreen = name;
+  ["clinical", "guidelines"].forEach(k => $("screen-" + k).classList.remove("m-detail"));
   updateSidebar();
   window.scrollTo(0, 0);
 }
@@ -3532,6 +3626,7 @@ function updateSidebar() {
     const tab = b.dataset.screen === "dosing" ? (dt && dt.dataset.t) : (vt && vt.dataset.v);
     b.classList.toggle("active", cur && b.dataset.tab === tab);
   });
+  if (window.mNavSync) window.mNavSync();
 }
 
 function toggleSidebar() {
@@ -4324,6 +4419,52 @@ setHeaderH();
   document.addEventListener("click", e => { if (!e.target.closest(".hero-search, .gs-ex")) box.classList.remove("open"); });
 })();
 showScreen("home");
+/* ===== Mobile app layer (phones only; no effect on desktop) ===== */
+(function () {
+  const mq = window.matchMedia("(max-width: 768px)");
+  const NAV = {home: "home", dosing: "dosing", safety: "safety", clinical: "clinical"};
+  window.mNavSync = function () {
+    const k = NAV[currentScreen] || "more";
+    document.querySelectorAll(".mnav button").forEach(b => b.classList.toggle("on", b.dataset.m === k));
+  };
+  window.mMore = function (open) { $("mMore").hidden = !open; document.body.style.overflow = open ? "hidden" : ""; };
+  window.mGo = function (name) { window.mMore(false); showScreen(name); };
+  window.mSearch = function () {
+    showScreen("home");
+    setTimeout(() => { const q = $("gs_q"); if (q) { q.focus(); q.scrollIntoView({block: "center"}); } }, 0);
+  };
+  window.mBack = function (screen) { $("screen-" + screen).classList.remove("m-detail"); window.scrollTo(0, 0); };
+  const detail = s => { $("screen-" + s).classList.add("m-detail"); window.scrollTo(0, 0); };
+
+  /* calculators and guidelines: list first, then detail */
+  const oc = window.cdtOpen, og = window.glOpen;
+  if (oc) window.cdtOpen = id => { oc(id); detail("clinical"); };
+  if (og) window.glOpen = id => { og(id); detail("guidelines"); };
+  const cn = $("cdt_nav"), gn = $("gl_list");
+  if (cn) cn.addEventListener("click", e => { if (e.target.closest("button[data-id]")) detail("clinical"); }, true);
+  if (gn) gn.addEventListener("click", e => { if (e.target.closest("button[data-id]")) detail("guidelines"); }, true);
+
+  /* safety checker: collapsible steps with live counts */
+  function counts() {
+    const a = document.querySelectorAll("#sc_alg input:checked").length + ($("sc_algtxt").value.trim() ? $("sc_algtxt").value.split(",").filter(s => s.trim()).length : 0);
+    const c = document.querySelectorAll("#sc_con input:checked").length;
+    $("sc_n_alg").textContent = a ? a + " selected" : "";
+    $("sc_n_con").textContent = c ? c + " selected" : "";
+  }
+  const sc = $("screen-safety");
+  sc.addEventListener("change", counts); sc.addEventListener("input", counts);
+  if (mq.matches) { $("sc_sec_alg").classList.add("closed"); $("sc_sec_con").classList.add("closed"); }
+  counts();
+
+  /* bring results into view after a safety check */
+  const run = window.scRun;
+  if (run) window.scRun = function () {
+    const r = run.apply(this, arguments);
+    Promise.resolve(r).then(() => { if (mq.matches) setTimeout(() => $("sc_out").scrollIntoView({behavior: "smooth", block: "start"}), 50); });
+    return r;
+  };
+  window.mNavSync();
+})();
 </script>
 </body>
 </html>
