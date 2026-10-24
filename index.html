@@ -549,9 +549,12 @@
   @media (max-width: 768px) {
     /* navigation: bottom bar replaces the sidebar */
     #sidebar, #sbOverlay, .menu-btn { display: none !important; }
-    .mnav { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; background: var(--accent); border-top: 0; box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.18); padding-bottom: env(safe-area-inset-bottom); }
-    .mnav button { flex: 1; border: 0; background: none; color: rgba(255, 255, 255, 0.78); font: inherit; font-size: 11px; font-weight: 600; padding: 8px 0 7px; min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; }
-    .mnav button.on { color: #fff; background: rgba(255, 255, 255, 0.2); }
+    .mnav { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; background: #bfe3ff; border-top: 1px solid #9fcdf5; padding: 0 0 env(safe-area-inset-bottom); overflow: hidden; }
+    .mnav button { flex: 1; min-width: 0; border: 0; background: none; color: #35506b; font: inherit; font-size: 11px; font-weight: 600; padding: 0; margin: 6px 3px; min-height: 48px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; }
+    .mnav button.on { color: #075985; background: rgba(255, 255, 255, 0.75); }
+    :root[data-theme="dark"] .mnav { background: #ffffff; border-top-color: #e2e8f0; }
+    :root[data-theme="dark"] .mnav button { color: #475569; }
+    :root[data-theme="dark"] .mnav button.on { color: #075985; background: #dbeeff; }
     .mnav svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
     /* stop iOS zoom-on-focus and enlarge tap targets */
@@ -651,6 +654,11 @@
     .msheet .mico { font-size: 22px; width: 32px; text-align: center; }
     .msheet-foot { margin: 14px 2px 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
     .msheet-foot a { color: var(--accent); text-decoration: none; }
+  }
+  @media (max-width: 768px) and (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]):not([data-theme="dark"]) .mnav { background: #ffffff; border-top-color: #e2e8f0; }
+    :root:not([data-theme="light"]):not([data-theme="dark"]) .mnav button { color: #475569; }
+    :root:not([data-theme="light"]):not([data-theme="dark"]) .mnav button.on { color: #075985; background: #dbeeff; }
   }
 </style>
 </head>
