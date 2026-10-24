@@ -549,12 +549,12 @@
   @media (max-width: 768px) {
     /* navigation: bottom bar replaces the sidebar */
     #sidebar, #sbOverlay, .menu-btn { display: none !important; }
-    .mnav { --mc: #bfe3ff; --mb: #9fcdf5; display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; background: var(--mc); border-top: 1px solid var(--mb); padding: 0 0 env(safe-area-inset-bottom); pointer-events: none; }
+    .mnav { --mc: #bfe3ff; --mb: #9fcdf5; display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; background: linear-gradient(var(--mb), var(--mb)) top / 100% 1px no-repeat, linear-gradient(var(--mc), var(--mc)) top / 100% 70px no-repeat; padding: 0 10px env(safe-area-inset-bottom); pointer-events: none; }
     .mnav button { pointer-events: auto; flex: 1; min-width: 0; border: 0; background: none; color: #35506b; font: inherit; font-size: 11px; font-weight: 600; padding: 0; margin: 8px 3px; min-height: 54px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; }
     .mnav button.on { color: #075985; background: rgba(255, 255, 255, 0.75); }
-    :root[data-theme="dark"] .mnav { --mc: #ffffff; --mb: #e2e8f0; }
-    :root[data-theme="dark"] .mnav button { color: #475569; }
-    :root[data-theme="dark"] .mnav button.on { color: #075985; background: #dbeeff; }
+    :root[data-theme="dark"] .mnav { --mc: #bfe3ff; --mb: #9fcdf5; }
+    :root[data-theme="dark"] .mnav button { color: #35506b; }
+    :root[data-theme="dark"] .mnav button.on { color: #075985; background: rgba(255, 255, 255, 0.75); }
     .mnav svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
     .mnav button[data-m="dosing"] svg { stroke: #0284c7; }
     .mnav button[data-m="safety"] svg { stroke: #ea580c; }
@@ -659,9 +659,9 @@
     .msheet-foot a { color: var(--accent); text-decoration: none; }
   }
   @media (max-width: 768px) and (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]):not([data-theme="dark"]) .mnav { --mc: #ffffff; --mb: #e2e8f0; }
-    :root:not([data-theme="light"]):not([data-theme="dark"]) .mnav button { color: #475569; }
-    :root:not([data-theme="light"]):not([data-theme="dark"]) .mnav button.on { color: #075985; background: #dbeeff; }
+    :root:not([data-theme="light"]):not([data-theme="dark"]) .mnav { --mc: #bfe3ff; --mb: #9fcdf5; }
+    :root:not([data-theme="light"]):not([data-theme="dark"]) .mnav button { color: #35506b; }
+    :root:not([data-theme="light"]):not([data-theme="dark"]) .mnav button.on { color: #075985; background: rgba(255, 255, 255, 0.75); }
   }
 
   /* ===== Unique colour per tool icon ===== */
@@ -674,6 +674,16 @@
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]):not([data-theme="dark"]) .tool-icon,
     :root:not([data-theme="light"]):not([data-theme="dark"]) .sb-ico { color: var(--ic-d, var(--ic)); }
+  }
+
+  /* ===== Unique background colour per tool card ===== */
+  .tool-card[onclick] { --card-border: var(--ic); background: color-mix(in srgb, var(--ic) 13%, var(--card)); }
+  .tool-card[onclick] .tool-icon { background: color-mix(in srgb, var(--ic) 24%, transparent) !important; }
+  :root[data-theme="dark"] .tool-card[onclick] { --card-border: var(--ic-d); background: color-mix(in srgb, var(--ic-d) 17%, var(--card)); }
+  :root[data-theme="dark"] .tool-card[onclick] .tool-icon { background: color-mix(in srgb, var(--ic-d) 26%, transparent) !important; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]):not([data-theme="dark"]) .tool-card[onclick] { --card-border: var(--ic-d); background: color-mix(in srgb, var(--ic-d) 17%, var(--card)); }
+    :root:not([data-theme="light"]):not([data-theme="dark"]) .tool-card[onclick] .tool-icon { background: color-mix(in srgb, var(--ic-d) 26%, transparent) !important; }
   }
 </style>
 </head>
@@ -768,7 +778,7 @@
   <!-- Bento Grid Tools -->
   <h3 class="section-title">Tools</h3>
   <div class="tools-grid">
-    <div class="tool-card dosing" role="button" tabindex="0" onclick="showScreen('dosing')">
+    <div class="tool-card dosing" role="button" tabindex="0" style="--ic:#0284c7;--ic-d:#38bdf8" onclick="showScreen('dosing')">
       <div>
         <div class="tool-icon" style="--ic:#0284c7;--ic-d:#38bdf8"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-35 12 12)"/><path d="M9.5 8.5l6 6"/></svg></div>
         <h3 class="tool-title">Paediatric Dosing</h3>
@@ -777,7 +787,7 @@
       <span class="tool-cta">Open Calculator <span>&#8594;</span></span>
     </div>
 
-    <div class="tool-card transfusion" role="button" tabindex="0" onclick="showScreen('transfusion')">
+    <div class="tool-card transfusion" role="button" tabindex="0" style="--ic:#e11d48;--ic-d:#fb7185" onclick="showScreen('transfusion')">
       <div>
         <div class="tool-icon" style="--ic:#e11d48;--ic-d:#fb7185"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg></div>
         <h3 class="tool-title">Transfusion Guide</h3>
@@ -786,7 +796,7 @@
       <span class="tool-cta">Calculate Transfusion <span>&#8594;</span></span>
     </div>
 
-    <div class="tool-card interactions" role="button" tabindex="0" onclick="showScreen('interactions')">
+    <div class="tool-card interactions" role="button" tabindex="0" style="--ic:#9333ea;--ic-d:#c084fc" onclick="showScreen('interactions')">
       <div>
         <div class="tool-icon" style="--ic:#9333ea;--ic-d:#c084fc"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="5.5"/><circle cx="15" cy="12" r="5.5"/></svg></div>
         <h3 class="tool-title">Drug Interactions</h3>
@@ -795,7 +805,7 @@
       <span class="tool-cta">Lookup Drug <span>&#8594;</span></span>
     </div>
 
-    <div class="tool-card interactions" role="button" tabindex="0" onclick="showScreen('safety')">
+    <div class="tool-card interactions" role="button" tabindex="0" style="--ic:#ea580c;--ic-d:#fb923c" onclick="showScreen('safety')">
       <div>
         <div class="tool-icon" style="--ic:#ea580c;--ic-d:#fb923c"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
         <h3 class="tool-title">Prescriptions Safety Checker</h3>
@@ -804,7 +814,7 @@
       <span class="tool-cta">Check Prescription <span>&#8594;</span></span>
     </div>
 
-    <div class="tool-card vaccines" role="button" tabindex="0" onclick="showScreen('vaccines')">
+    <div class="tool-card vaccines" role="button" tabindex="0" style="--ic:#0d9488;--ic-d:#2dd4bf" onclick="showScreen('vaccines')">
       <div>
         <div class="tool-icon" style="--ic:#0d9488;--ic-d:#2dd4bf"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2l4 4M17 7l3-3M19 9l-8.7 8.7a1 1 0 0 1-1.4 0l-3.6-3.6a1 1 0 0 1 0-1.4L14 4M9 11l4 4M5 19l-3 3M14 7l3 3"/></svg></div>
         <h3 class="tool-title">Egyptian Immunization</h3>
@@ -813,7 +823,7 @@
       <span class="tool-cta">View Timetable <span>&#8594;</span></span>
     </div>
 
-    <div class="tool-card clinical" role="button" tabindex="0" onclick="showScreen('clinical')">
+    <div class="tool-card clinical" role="button" tabindex="0" style="--ic:#4f46e5;--ic-d:#818cf8" onclick="showScreen('clinical')">
       <div>
         <div class="tool-icon" style="--ic:#4f46e5;--ic-d:#818cf8"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2"/></svg></div>
         <h3 class="tool-title">Clinical Decision Tool</h3>
@@ -822,7 +832,7 @@
       <span class="tool-cta">Open Calculators <span>&#8594;</span></span>
     </div>
 
-    <div class="tool-card guidelines" role="button" tabindex="0" onclick="showScreen('guidelines')">
+    <div class="tool-card guidelines" role="button" tabindex="0" style="--ic:#65a30d;--ic-d:#a3e635" onclick="showScreen('guidelines')">
       <div>
         <div class="tool-icon" style="--ic:#65a30d;--ic-d:#a3e635"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg></div>
         <h3 class="tool-title">Diseases &amp; Clinical Guidelines</h3>
@@ -831,7 +841,7 @@
       <span class="tool-cta">Open Guidelines <span>&#8594;</span></span>
     </div>
 
-    <div class="tool-card vitals" role="button" tabindex="0" onclick="showScreen('vitals')">
+    <div class="tool-card vitals" role="button" tabindex="0" style="--ic:#d97706;--ic-d:#fbbf24" onclick="showScreen('vitals')">
       <div>
         <div class="tool-icon" style="--ic:#d97706;--ic-d:#fbbf24"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg></div>
         <h3 class="tool-title">Vitals &amp; GCS</h3>
