@@ -424,6 +424,26 @@
     #cdt_nav { position: static; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 12px; }
   }
 
+
+  /* ---- Diseases & Clinical Guidelines ---- */
+  .tool-card.guidelines { --card-border: #0d9488; }
+  #gl_nav { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px; box-shadow: var(--shadow); position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto; }
+  #gl_q { margin-bottom: 6px; }
+  #gl_nav button { display: block; width: 100%; text-align: left; padding: 8px 10px; border: 0; background: transparent; color: var(--ink); border-radius: 8px; font-size: 14px; font-family: inherit; cursor: pointer; }
+  #gl_nav button:hover { background: var(--card-hover); }
+  #gl_nav button.active { background: var(--accent-light); color: var(--accent); font-weight: 700; }
+  .gl-panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 22px; box-shadow: var(--shadow); min-width: 0; }
+  .gl-sec { border: 1px solid var(--line); border-radius: 10px; margin: 8px 0; padding: 0 14px; background: var(--bg); }
+  .gl-sec summary { cursor: pointer; font-weight: 700; padding: 10px 0; }
+  .gl-sec .bl { margin: 0 0 12px; }
+  .gl-sec ol.bl { padding-left: 22px; }
+  .gl-em { border-color: var(--warn); }
+  .gl-em summary { color: var(--warn); }
+  .gl-red { border-color: var(--amber); }
+  .gl-links { margin-top: 14px; font-size: 14px; }
+  .gl-links a { color: var(--accent); }
+  @media (max-width: 860px) { #gl_nav { position: static; max-height: 340px; } }
+
   /* ---- Vitals & GCS tool ---- */
   .tool-card.vitals { --card-border: #f59e0b; }
   .vpanel { display: none; background: var(--card); border: 1px solid var(--line); border-radius: 0 10px 10px 10px; padding: 22px; box-shadow: var(--shadow); }
@@ -532,6 +552,7 @@
   <button class="sb-item" data-screen="vaccines" onclick="goScreen('vaccines')"><span class="sb-ico">&#128137;</span>Egyptian Immunization</button>
 
   <button class="sb-item" data-screen="clinical" onclick="goScreen('clinical')"><span class="sb-ico">&#129518;</span>Clinical Decision Tool</button>
+  <button class="sb-item" data-screen="guidelines" onclick="goScreen('guidelines')"><span class="sb-ico">&#129658;</span>Diseases &amp; Guidelines</button>
   <button class="sb-item" data-screen="vitals" onclick="goScreen('vitals')"><span class="sb-ico">&#129658;</span>Vitals &amp; GCS</button>
   <div class="sb-subs" data-screen="vitals">
     <button class="sb-sub" data-screen="vitals" data-tab="vitals" onclick="goTab('vitals','vitals')">Vital signs check</button>
@@ -618,6 +639,15 @@
       <span class="tool-cta">Open Calculators <span>&#8594;</span></span>
     </div>
 
+    <div class="tool-card guidelines" role="button" tabindex="0" onclick="showScreen('guidelines')">
+      <div>
+        <div class="tool-icon">&#129658;</div>
+        <h3 class="tool-title">Diseases &amp; Clinical Guidelines</h3>
+        <p class="tool-desc">Concise guidance by specialty: criteria, investigations, first-line and alternative treatment, algorithms, red flags, emergency care, follow-up and guideline links.</p>
+      </div>
+      <span class="tool-cta">Open Guidelines <span>&#8594;</span></span>
+    </div>
+
     <div class="tool-card vitals" role="button" tabindex="0" onclick="showScreen('vitals')">
       <div>
         <div class="tool-icon">&#129658;</div>
@@ -666,6 +696,13 @@
             <option value="para">Paracetamol (oral)</option>
             <option value="ibu">Ibuprofen (oral)</option>
             <option value="amox">Amoxicillin (oral, mg/kg/day split)</option>
+            <option value="augm">Amoxicillin-clavulanate (oral)</option>
+            <option value="azi">Azithromycin (oral)</option>
+            <option value="cefix">Cefixime (oral)</option>
+            <option value="ceftri">Ceftriaxone (IV/IM)</option>
+            <option value="onda">Ondansetron (oral)</option>
+            <option value="pred">Prednisolone (oral)</option>
+            <option value="metro">Metronidazole (oral)</option>
           </select></div>
         <div><label>Weight (kg)</label><input id="d_w" type="number" step="0.01" value="10"></div>
         <div><label>Dose (per kg)</label><input id="d_dpk" type="number" step="0.01" value="15"></div>
@@ -676,6 +713,7 @@
         <div><label>Max daily dose (mg)</label><input id="d_maxday" type="number" step="any" value="4000"></div>
         <div><label>Concentration (mg/mL)</label><input id="d_conc" type="number" step="any" value="24"></div>
       </div>
+      <div id="d_info" class="cdt-hint" style="margin:10px 0"></div>
       <button class="go" onclick="calcDrug()">Calculate</button>
       <div class="out" id="d_out"></div>
       <ul class="note">
@@ -870,6 +908,17 @@ w*0.01
   </div>
 </div>
 
+<!-- DISEASES & CLINICAL GUIDELINES SCREEN -->
+<div id="screen-guidelines" class="screen" hidden>
+  <div class="cdt-wrap">
+    <div id="gl_nav">
+      <input id="gl_q" type="search" placeholder="Search condition or specialty" autocomplete="off" aria-label="Search conditions">
+      <div id="gl_list"></div>
+    </div>
+    <div id="gl_panel" class="gl-panel"></div>
+  </div>
+</div>
+
 <!-- VITALS & GCS SCREEN -->
 <div id="screen-vitals" class="screen" hidden>
   <nav id="vtabs">
@@ -985,7 +1034,8 @@ const SCREENS = {
   safety: ["Prescriptions Safety Checker", "Interactions, allergies, duplicates, contraindications, dose errors and monitoring"],
   vaccines: ["Egyptian Vaccination Schedule", "Official MOHP routine childhood immunization timetable"],
   vitals: ["Vitals & GCS", "Age-based vital sign ranges and paediatric Glasgow Coma Scale"],
-  clinical: ["Clinical Decision Tool", "Calculators and validated scores with method, interpretation and limitations"]
+  clinical: ["Clinical Decision Tool", "Calculators and validated scores with method, interpretation and limitations"],
+  guidelines: ["Diseases & Clinical Guidelines", "Concise guidance by specialty with red flags, emergency care and guideline links"]
 };
 
 let currentScreen = "home";
@@ -1023,14 +1073,33 @@ const bl = items => '<ul class="bl">' + items.map(i =>
 
 /* Calculators */
 const PRESETS = {
-  para: {dpk:15, basis:"dose", n:4, maxd:1000, maxday:4000, conc:24},
-  ibu:  {dpk:10, basis:"dose", n:3, maxd:400,  maxday:1200, conc:20},
-  amox: {dpk:40, basis:"day",  n:3, maxd:1000, maxday:3000, conc:25}
+  para:  {name:"Paracetamol (oral)", dpk:15, basis:"dose", n:4, maxd:1000, maxday:4000, conc:24, maxkg:75,
+          rng:"10-15 mg/kg every 4-6 h; max 4 doses/day and 75 mg/kg/day.", note:"Use lower doses under 3 months; avoid duplicate paracetamol products; caution in liver disease. Usual syrup 120 mg/5 mL."},
+  ibu:   {name:"Ibuprofen (oral)", dpk:10, basis:"dose", n:3, maxd:400, maxday:1200, conc:20, maxkg:40,
+          rng:"5-10 mg/kg every 6-8 h; max 40 mg/kg/day.", note:"Age 3 months and over (5 kg+). Avoid in dehydration, renal impairment, varicella or GI bleeding; give with food. Usual syrup 100 mg/5 mL."},
+  amox:  {name:"Amoxicillin (oral)", dpk:40, basis:"day", n:3, maxd:1000, maxday:3000, conc:25, maxkg:90,
+          rng:"25-50 mg/kg/day in 2-3 doses; 80-90 mg/kg/day (high dose) for otitis media or pneumonia.", note:"Check penicillin allergy. Usual syrup 125 mg/5 mL."},
+  augm:  {name:"Amoxicillin-clavulanate (amoxicillin component)", dpk:45, basis:"day", n:2, maxd:875, maxday:1750, conc:80, maxkg:90,
+          rng:"25-45 mg/kg/day of amoxicillin in 2 doses; up to 90 mg/kg/day with 14:1 formulations.", note:"Concentration shown is 400 mg/5 mL (457 suspension): edit it for your bottle (156/5, 312/5...). Give with food; diarrhoea is common."},
+  azi:   {name:"Azithromycin (oral)", dpk:10, basis:"dose", n:1, maxd:500, maxday:500, conc:40, maxkg:0,
+          rng:"10 mg/kg once daily for 3 days (max 500 mg); 5-day course: 10 mg/kg day 1 then 5 mg/kg days 2-5.", note:"May prolong QT: avoid with other QT-prolonging drugs. Usual suspension 200 mg/5 mL."},
+  cefix: {name:"Cefixime (oral)", dpk:8, basis:"day", n:2, maxd:400, maxday:400, conc:20, maxkg:0,
+          rng:"8 mg/kg/day as one dose or split every 12 h; max 400 mg/day.", note:"Children over 6 months; reduce in renal impairment. Possible cross-reactivity in penicillin allergy. Usual suspension 100 mg/5 mL."},
+  ceftri:{name:"Ceftriaxone (IV/IM)", dpk:50, basis:"day", n:1, maxd:2000, maxday:4000, conc:100, maxkg:100,
+          rng:"50-80 mg/kg once daily; meningitis 100 mg/kg/day in 1-2 doses; max 4 g/day.", note:"IV concentration shown (100 mg/mL); IM uses a more concentrated lidocaine diluent. Avoid in neonates with jaundice and never mix with calcium-containing infusions."},
+  onda:  {name:"Ondansetron (oral)", dpk:0.15, basis:"dose", n:3, maxd:8, maxday:24, conc:0.8, maxkg:0,
+          rng:"0.15 mg/kg per dose every 8 h (max 8 mg); a single dose is often enough in gastroenteritis.", note:"Oral use from 6 months. May prolong QT; can cause constipation. Usual syrup 4 mg/5 mL."},
+  pred:  {name:"Prednisolone (oral)", dpk:1, basis:"day", n:1, maxd:40, maxday:40, conc:1, maxkg:2,
+          rng:"1-2 mg/kg once daily for 3-5 days in asthma exacerbation (max 40 mg/day).", note:"Strength varies (5 mg/5 mL = 1 mg/mL; 15 mg/5 mL = 3 mg/mL): check your bottle. Give with food; short courses need no taper."},
+  metro: {name:"Metronidazole (oral)", dpk:7.5, basis:"dose", n:3, maxd:400, maxday:1200, conc:40, maxkg:0,
+          rng:"7.5 mg/kg every 8 h for anaerobic infection; giardiasis about 15 mg/kg/day in 3 doses; amoebiasis 35-50 mg/kg/day in 3 doses.", note:"Regimen depends on indication: confirm locally. Metallic taste; avoid alcohol. Usual suspension 200 mg/5 mL."}
 };
 function applyPreset() {
-  const p = PRESETS[$("d_preset").value]; if (!p) return;
+  const p = PRESETS[$("d_preset").value], inf = $("d_info");
+  if (!p) { inf.innerHTML = ""; return; }
   $("d_dpk").value=p.dpk; $("d_basis").value=p.basis; $("d_n").value=p.n;
   $("d_maxd").value=p.maxd; $("d_maxday").value=p.maxday; $("d_conc").value=p.conc;
+  inf.innerHTML = "<b>" + esc(p.name) + "</b><br>Usual range: " + esc(p.rng) + "<br>" + esc(p.note) + "<br><i>Presets are starting points: confirm against your formulary, indication, age and organ function.</i>";
 }
 
 function calcDrug() {
@@ -1043,6 +1112,8 @@ function calcDrug() {
   let daily = single*n;
   if (maxday>0 && daily>maxday) { flags.push("Daily total ("+r(daily)+" mg) exceeds max daily dose ("+maxday+" mg)"); }
   const mgkgDay = daily/w;
+  const pr = PRESETS[$("d_preset").value];
+  if (pr && pr.maxkg && mgkgDay>pr.maxkg) flags.push("Daily dose ("+r(mgkgDay)+" mg/kg/day) exceeds the usual maximum of "+pr.maxkg+" mg/kg/day for "+pr.name);
   const items = [["Single dose", r(single)+" mg"]];
   if (conc>0) items.push(["Volume per dose", r(single/conc)+" mL"]);
   items.push(["Frequency", n+" times/day (every "+r(24/n,1)+" h)"]);
@@ -3797,6 +3868,245 @@ setHeaderH();
   window.cdtReset = () => select(cur.id);
   window.cdtOpen = select;
   select(CALCS[0].id);
+})();
+
+
+/* ===== Diseases & Clinical Guidelines ===== */
+(function () {
+  const E = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const L = {
+    esc: ["ESC Clinical Practice Guidelines", "https://www.escardio.org/Guidelines/Clinical-Practice-Guidelines"],
+    acc: ["ACC/AHA Guidelines", "https://www.acc.org/guidelines"],
+    nice: ["NICE Guidance", "https://www.nice.org.uk/guidance"],
+    who: ["WHO Guidelines", "https://www.who.int/publications/who-guidelines"],
+    bts: ["BTS Guidelines", "https://www.brit-thoracic.org.uk/quality-improvement/guidelines/"],
+    idsa: ["IDSA Practice Guidelines", "https://www.idsociety.org/practice-guideline/practice-guidelines/"],
+    jbds: ["JBDS Inpatient Diabetes Guidance", "https://abcd.care/joint-british-diabetes-societies-jbds-inpatient-care-group"],
+    ada: ["ADA Standards of Care", "https://professional.diabetes.org/standards-of-care"],
+    wses: ["WSES Guidelines", "https://www.wses.org.uk"],
+    gina: ["GINA (asthma)", "https://ginasthma.org"],
+    acog: ["ACOG Clinical Guidance", "https://www.acog.org/clinical/clinical-guidance"],
+    rcog: ["RCOG Guidelines", "https://www.rcog.org.uk/guidance/browse-all-guidance/"],
+    asco: ["ASCO Guidelines", "https://www.asco.org/practice-patients/guidelines"],
+    esmo: ["ESMO Guidelines", "https://www.esmo.org/guidelines"],
+    nccn: ["NCCN Guidelines (free registration)", "https://www.nccn.org/guidelines/category_1"],
+    resus: ["Resuscitation Council UK", "https://www.resus.org.uk/library"],
+    ssc: ["Surviving Sepsis Campaign", "https://www.sccm.org/survivingsepsiscampaign/guidelines-and-resources"]
+  };
+  const CALC = {chads: "CHA\u2082DS\u2082-VASc", hasbled: "HAS-BLED", curb: "CURB-65", agosm: "Anion gap & osmolality", maint: "IV maintenance fluids", pdose: "Paediatric dose", apache: "APACHE II", wellspe: "Wells PE"};
+  const SP = ["Internal medicine", "Surgery", "Paediatrics", "Obstetrics & gynaecology", "Oncology", "Cardiology", "Emergency medicine"];
+  const SEC = [["sym", "Symptoms", 1], ["dx", "Diagnostic criteria", 1], ["ddx", "Differential diagnosis", 0], ["ix", "Investigations & interpretation", 0], ["t1", "First-line treatment", 1], ["t2", "Alternative treatments", 0],
+    ["algo", "Management algorithm (step by step)", 1], ["red", "Red flags & referral criteria", 1], ["em", "Emergency management", 1], ["fu", "Follow-up & monitoring", 0]];
+
+  // every section is a "|"-separated list
+  const D = [
+  {id: "acs", sp: 5, n: "Acute coronary syndrome (STEMI / NSTE-ACS)", k: "chest pain myocardial infarction heart attack troponin stemi",
+   sym: "Central chest pressure or tightness lasting >20 min, may radiate to arm, jaw or back|Sweating, nausea, dyspnoea, syncope|Atypical presentations (epigastric pain, fatigue) are common in women, the elderly and diabetics",
+   dx: "STEMI: ST elevation \u22651 mm in 2 contiguous leads (\u22652 mm in V2-V3 for men \u226540 y; \u22651.5 mm for women) or new LBBB with ischaemic symptoms|NSTE-ACS: ischaemic symptoms with dynamic ECG changes and/or a rise-and-fall of hs-troponin above the 99th percentile",
+   ddx: "Aortic dissection|Pulmonary embolism|Pericarditis or myocarditis|Pneumothorax|Oesophageal spasm / GERD|Takotsubo cardiomyopathy|Musculoskeletal pain",
+   ix: "12-lead ECG within 10 min of arrival; repeat every 15-30 min if pain persists or ECG is non-diagnostic|hs-troponin at 0 h and 1-3 h (high or rising = myocardial injury; very low and flat = rule-out). Do not delay reperfusion for troponin in STEMI|CXR, FBC, U&E, glucose, lipids; bedside echo for wall-motion abnormality or complications",
+   t1: "Aspirin 300 mg loading (chewed), then 75-100 mg daily|P2Y12 inhibitor: ticagrelor 180 mg or prasugrel 60 mg (clopidogrel 300-600 mg if others unsuitable)|Parenteral anticoagulant (unfractionated heparin or enoxaparin)|STEMI: primary PCI (goal \u226490 min door-to-balloon; \u2264120 min from diagnosis)|Nitrate and IV opioid for pain; oxygen only if SpO\u2082 <90%",
+   t2: "STEMI when PCI is not possible within 120 min: fibrinolysis (e.g. tenecteplase) within 10 min of diagnosis, then transfer for angiography 2-24 h later|Aspirin allergy: clopidogrel|Once stable: beta-blocker, ACE inhibitor/ARB and high-intensity statin (avoid beta-blocker in shock or acute heart failure)",
+   algo: "Triage chest pain and record ECG within 10 min|STEMI or equivalent: activate the cath lab / reperfusion pathway immediately|Non-diagnostic ECG: serial hs-troponin plus risk score (HEART, GRACE)|High-risk NSTE-ACS (instability, refractory pain, arrhythmia): immediate angiography; otherwise early invasive strategy within 24-72 h|Admit to a monitored bed; start secondary prevention before discharge",
+   red: "Haemodynamic instability, cardiogenic shock, acute heart failure|Ventricular arrhythmia or ongoing pain despite treatment|Mechanical complication (new murmur, VSD, free-wall rupture)|Refer every STEMI or high-risk ACS to the PCI centre / cardiology at once",
+   em: "Resuscitation bay with monitor and defibrillator pads, IV access; oxygen only if hypoxic|VF / pulseless VT: ALS protocol with immediate defibrillation|Cardiogenic shock: urgent revascularisation, vasopressor/inotrope, avoid fluid overload",
+   fu: "Dual antiplatelet therapy for 12 months (shorter if high bleeding risk)|Cardiac rehabilitation, smoking cessation, BP and diabetes control|Review at 2 weeks and 3 months; echo for LVEF|LDL-C goal <1.4 mmol/L (55 mg/dL) with \u226550% reduction; recheck lipids at 4-8 weeks",
+   calc: "", l: "esc,acc,nice"},
+  {id: "af", sp: 5, n: "Atrial fibrillation", k: "af palpitations irregular rhythm anticoagulation stroke",
+   sym: "Palpitations, dyspnoea, fatigue, dizziness, chest discomfort|May be asymptomatic or present as stroke or heart failure",
+   dx: "ECG showing an irregularly irregular rhythm without distinct P waves lasting \u226530 s|Classify: first diagnosed, paroxysmal (<7 d), persistent (>7 d), long-standing persistent, permanent",
+   ddx: "Atrial flutter|Multifocal atrial tachycardia|Sinus tachycardia with ectopics|SVT|Triggers: thyrotoxicosis, sepsis, PE, alcohol",
+   ix: "12-lead ECG|TSH, U&E (K\u207a, Mg), FBC, renal and liver function|Echocardiogram (LV function, valves, atrial size)|Look for causes: hypertension, alcohol, sleep apnoea, sepsis, thyroid disease, PE",
+   t1: "Unstable (shock, ischaemia, pulmonary oedema): synchronised DC cardioversion|Stable: rate control with bisoprolol/metoprolol or diltiazem/verapamil (not in HFrEF); add digoxin in HF or sedentary patients|Oral anticoagulation when CHA\u2082DS\u2082-VASc \u22652 (men) or \u22653 (women); DOAC preferred over warfarin|Treat causes and risk factors",
+   t2: "Rhythm control (cardioversion, antiarrhythmic, catheter ablation) for symptomatic patients or early AF; anticoagulate for 3 weeks (or TOE) before elective cardioversion if onset >48 h|IV amiodarone for rate/rhythm control in critical illness or HF|Warfarin (INR 2-3) for mechanical valves or moderate-severe mitral stenosis",
+   algo: "ABC and 12-lead ECG; decide haemodynamic stability|Unstable: synchronised cardioversion|Stable: choose rate or rhythm control based on symptoms and onset|Calculate CHA\u2082DS\u2082-VASc and HAS-BLED; start anticoagulation|Treat triggers; arrange echo and follow-up",
+   red: "Haemodynamic instability, acute HF, ongoing ischaemia|Pre-excited AF (WPW): avoid AV-nodal blockers|Stroke or TIA symptoms|Refer to cardiology for ablation consideration, refractory symptoms or HFrEF",
+   em: "Unstable: sedation and synchronised biphasic shock 120-200 J|Rapid AF with HF: IV amiodarone or digoxin; avoid diltiazem in HFrEF|WPW pre-excitation: electrical cardioversion or procainamide",
+   fu: "Review at 1 month then every 3-6 months: symptoms, heart rate, BP|Annual renal function and FBC on DOAC; reassess stroke and bleeding risk; check DOAC dose against age, weight and creatinine",
+   calc: "chads,hasbled", l: "esc,acc,nice"},
+  {id: "cap", sp: 0, n: "Community-acquired pneumonia (adult)", k: "pneumonia chest infection cough fever curb-65 antibiotics",
+   sym: "Cough, sputum, fever, pleuritic chest pain, dyspnoea|Confusion in the elderly; tachypnoea, tachycardia, crackles or bronchial breathing",
+   dx: "Acute lower respiratory symptoms plus new focal chest signs and a new infiltrate on chest imaging|Severity: CURB-65 (0-1 low, 2 moderate, 3-5 severe) plus SpO\u2082 and clinical judgement",
+   ddx: "Acute bronchitis|COVID-19 / influenza|Pulmonary embolism or infarct|Heart failure|Lung cancer or TB|Aspiration pneumonitis",
+   ix: "Chest X-ray (repeat only if not improving)|Pulse oximetry / ABG, FBC, CRP, U&E, LFTs|Moderate-severe: blood cultures, sputum culture, urinary Legionella and pneumococcal antigens|Influenza/COVID testing in season; TB work-up if risk factors",
+   t1: "Low severity: amoxicillin 500 mg-1 g three times daily for 5 days|Moderate: amoxicillin plus clarithromycin (or doxycycline) for 5 days|Severe: co-amoxiclav (or ceftriaxone) plus clarithromycin for 7-10 days|Oxygen to SpO\u2082 94-98%, fluids, analgesia, VTE prophylaxis",
+   t2: "Penicillin allergy: doxycycline 200 mg then 100 mg daily, or clarithromycin 500 mg twice daily|Respiratory fluoroquinolone (levofloxacin) only when other options are unsuitable|Adjust to culture results and local resistance",
+   algo: "Assess severity (CURB-65, SpO\u2082, comorbidity)|Score 0-1: treat at home, review at 48 h|Score 2: hospital assessment or supervised outpatient care|Score \u22653 or sepsis: admit, IV antibiotics within 4 h (within 1 h if shock), consider ICU for 4-5|Review at 48-72 h; switch IV to oral when improving",
+   red: "SpO\u2082 <92%, RR \u226530, hypotension, confusion|No improvement in 48-72 h (consider empyema, resistant organism, malignancy)|Haemoptysis, weight loss or smoker >50 y: repeat CXR at 6 weeks",
+   em: "Sepsis pathway: oxygen, IV access, lactate, blood cultures, IV antibiotics and fluids|Respiratory failure: high-flow oxygen or NIV, ICU review",
+   fu: "Clinical review at 6 weeks; repeat CXR at about 6 weeks if age >50, smoker or persistent symptoms|Pneumococcal and annual influenza vaccination; smoking cessation",
+   calc: "curb", l: "bts,idsa,nice"},
+  {id: "dka", sp: 0, n: "Diabetic ketoacidosis (adult)", k: "dka diabetes ketones insulin hyperglycaemia acidosis",
+   sym: "Polyuria, polydipsia, weight loss, nausea, vomiting, abdominal pain|Kussmaul breathing, dehydration, fruity breath, drowsiness",
+   dx: "Glucose >11 mmol/L (200 mg/dL) or known diabetes|Ketonaemia \u22653 mmol/L (or ketonuria \u22652+)|Venous pH <7.3 and/or bicarbonate <15 mmol/L",
+   ddx: "Hyperosmolar hyperglycaemic state|Alcoholic or starvation ketoacidosis|Lactic acidosis, sepsis|Toxic ingestion (salicylate, methanol, ethylene glycol)",
+   ix: "Capillary and lab glucose, blood ketones, venous gas, U&E (K\u207a), anion gap (see calculator), FBC, CRP|ECG (K\u207a changes), CXR, urine and blood cultures, troponin if indicated|Find the precipitant: infection, missed insulin, MI, new diabetes, drugs (SGLT2 inhibitors can cause euglycaemic DKA)",
+   t1: "0.9% sodium chloride: deficit about 100 mL/kg; first litre over 1 h (500 mL bolus if SBP <90), then taper over 24 h|Fixed-rate IV insulin 0.1 units/kg/h once K\u207a \u22653.5 mmol/L|Potassium: if K\u207a <5.5 add 20-40 mmol/L to fluids; hold insulin if K\u207a <3.5|Add 10% glucose when glucose <14 mmol/L (250 mg/dL) and continue insulin until ketones <0.6 mmol/L and pH >7.3",
+   t2: "Subcutaneous rapid-acting insulin protocols for mild-moderate DKA in selected settings|Bicarbonate only if pH <6.9 or life-threatening hyperkalaemia|Continue long-acting insulin alongside the infusion",
+   algo: "Confirm diagnosis and severity (pH, ketones, GCS, K\u207a)|Fluids first; start insulin infusion once K\u207a \u22653.5|Hourly glucose and ketones; venous gas and K\u207a at 1-2 h then every 2-4 h|Treat the precipitant; VTE prophylaxis|On resolution switch to subcutaneous insulin with a meal and overlap 30-60 min",
+   red: "pH <7.0, K\u207a <3.5 or >6, GCS <12, SBP <90 or pregnancy: HDU/ICU and senior review|Children and adolescents: use the paediatric DKA protocol (slower fluids, cerebral oedema risk)",
+   em: "Protect the airway if consciousness is reduced (avoid intubation if possible)|Large-bore IV access, continuous ECG; early senior/ICU review in severe DKA",
+   fu: "Diabetes specialist review before discharge; sick-day rules and ketone testing education|Follow-up within 1-2 weeks; review insulin regimen and HbA1c|Address psychosocial causes of omitted insulin",
+   calc: "agosm", l: "jbds,ada,nice"},
+  {id: "appy", sp: 1, n: "Acute appendicitis", k: "appendix right iliac fossa abdominal pain appendicectomy",
+   sym: "Periumbilical pain migrating to the right iliac fossa over 12-24 h|Anorexia, nausea, vomiting, low-grade fever|Children and elderly: atypical diffuse pain; pregnancy: higher, lateral pain",
+   dx: "Clinical diagnosis supported by scores and imaging|Alvarado score \u22657 (or AIR / paediatric appendicitis score high) favours appendicitis; rebound, guarding and Rovsing sign increase probability",
+   ddx: "Mesenteric adenitis (children)|Gastroenteritis|Ectopic pregnancy, ovarian torsion or cyst, PID|Ureteric colic|Crohn's disease|Meckel's or right-sided diverticulitis",
+   ix: "FBC, CRP, urinalysis|\u03b2-hCG in all women of childbearing age|Ultrasound first in children, pregnancy and thin patients|CT abdomen/pelvis in adults when uncertain; MRI in pregnancy if ultrasound is inconclusive",
+   t1: "Laparoscopic appendicectomy, ideally within 24 h of diagnosis|IV analgesia, fluids, antiemetic; nil by mouth|Single-dose pre-operative antibiotics (e.g. cefuroxime or ceftriaxone plus metronidazole)",
+   t2: "Selected uncomplicated cases without appendicolith: antibiotic-only treatment (amoxicillin-clavulanate, or ceftriaxone plus metronidazole); about 25-30% fail or recur within a year|Perforation or abscess: antibiotics with or without percutaneous drainage, then consider interval appendicectomy",
+   algo: "Assess for sepsis or peritonitis and resuscitate|Pregnancy test, bloods, urinalysis|Low probability: observe and re-examine; intermediate: image; high: surgical referral|Shared decision: surgery versus antibiotics alone|Post-operatively stop antibiotics after 24 h if uncomplicated; 3-5 days if perforated",
+   red: "Generalised peritonitis or rigid abdomen|Sepsis, shock or signs of perforation|Pregnancy, immunosuppression, elderly patient or infant: immediate surgical review",
+   em: "Sepsis bundle (cultures, lactate, fluids, antibiotics within 1 h)|Urgent laparoscopy or laparotomy for generalised peritonitis",
+   fu: "Wound check at 10-14 days; return sooner for fever, spreading redness or vomiting|Antibiotic-only pathway: follow up for recurrence for 12 months|Review histology; consider colonoscopy in patients >40 y with complicated appendicitis",
+   calc: "", l: "wses,nice"},
+  {id: "chole", sp: 1, n: "Acute cholecystitis", k: "gallbladder gallstones biliary murphy cholecystectomy right upper quadrant",
+   sym: "Right upper quadrant or epigastric pain >6 h radiating to the right shoulder|Fever, nausea, vomiting; Murphy sign|Previous biliary colic",
+   dx: "Tokyo 2018: (A) local signs (Murphy sign, RUQ pain or tenderness) + (B) systemic signs (fever, raised CRP or WBC) + (C) imaging findings|Definite diagnosis = one A + one B + C",
+   ddx: "Biliary colic|Acute cholangitis|Peptic ulcer disease|Pancreatitis|Hepatitis|Right lower lobe pneumonia|Myocardial infarction",
+   ix: "Ultrasound: stones, wall thickening >4 mm, pericholecystic fluid, sonographic Murphy|FBC, CRP, LFTs, lipase, U&E|Blood cultures if febrile; MRCP or CT if bile duct stones or complications are suspected",
+   t1: "IV fluids, analgesia, antiemetic|Antibiotics for moderate-severe disease (e.g. ceftriaxone plus metronidazole, or co-amoxiclav)|Early laparoscopic cholecystectomy, ideally within 7 days of onset (up to 10 days)",
+   t2: "High operative risk: percutaneous cholecystostomy, or antibiotics with delayed surgery|Mild cases: interval cholecystectomy within about 6 weeks",
+   algo: "Diagnose with Tokyo criteria and grade I-III|Resuscitate; give antibiotics for grade II-III|Grade I-II in a fit patient: early laparoscopic cholecystectomy|Grade III or unfit: organ support, drainage, delayed surgery|Check for bile duct stones (bilirubin, ALP, dilated duct): MRCP/ERCP",
+   red: "Jaundice with fever and rigors (cholangitis), hypotension|Organ dysfunction, emphysematous or gangrenous cholecystitis|Pregnancy, diabetes, elderly: low threshold for admission",
+   em: "Septic shock: sepsis bundle, ICU, urgent biliary drainage|Cholangitis: antibiotics and urgent ERCP",
+   fu: "Wound review at 10-14 days|Biliary leak symptoms or jaundice: urgent review|Non-operated patients: dietary advice and surgical clinic follow-up",
+   calc: "", l: "wses,nice"},
+  {id: "gast", sp: 2, n: "Acute gastroenteritis and dehydration (child)", k: "diarrhoea vomiting ors dehydration zinc rehydration children",
+   sym: "Acute diarrhoea (\u22653 loose stools/day), vomiting, fever, abdominal cramps|Dehydration: sunken eyes or fontanelle, reduced skin turgor, dry mucosa, little urine, lethargy",
+   dx: "Clinical: sudden diarrhoea with or without vomiting, usually <14 days|Classify dehydration (WHO/IMCI): none, some, or severe",
+   ddx: "Surgical abdomen (appendicitis, intussusception, volvulus)|UTI, sepsis, meningitis|DKA|Food allergy or intolerance|Inflammatory bowel disease|Antibiotic-associated diarrhoea",
+   ix: "Usually none; weigh the child|Stool culture/PCR if blood, immunocompromise, travel or persistent illness|U&E, glucose, gas if severe dehydration or shock|Urinalysis if fever without a clear source",
+   t1: "No dehydration (Plan A): continue feeds and breastfeeding, extra fluids, ORS after each loose stool|Some dehydration (Plan B): ORS 75 mL/kg over 4 h, then reassess|Zinc for 10-14 days: 10 mg/day (<6 months) or 20 mg/day (\u22656 months)|Severe dehydration or shock (Plan C): IV isotonic crystalloid 20 mL/kg bolus, reassess, then rehydrate",
+   t2: "Nasogastric ORS if unable to drink|Single oral ondansetron dose (0.15 mg/kg) if vomiting prevents ORS|Antibiotics only for dysentery (Shigella), cholera, severe Campylobacter or immunocompromised children|Avoid antimotility drugs and routine antibiotics",
+   algo: "Assess ABC, hydration and weight|Shock or severe dehydration: IV bolus and admit|Some dehydration: ORS for 4 h then reassess|No dehydration: home care with safety-net advice|Reassess regularly; resume normal diet early",
+   red: "Shock, lethargy, bilious or persistent vomiting, bloody stool with fever, severe abdominal pain or distension|Age <3 months, malnutrition, chronic disease|Diarrhoea >14 days: investigate as persistent diarrhoea",
+   em: "ABC, IV/IO access, 20 mL/kg isotonic bolus (repeat if still shocked), check glucose|Treat hypoglycaemia: 2 mL/kg of 10% dextrose",
+   fu: "Review within 24-48 h if not improving or high risk; weigh at follow-up|Stop zinc after 10-14 days|Hand hygiene, rotavirus vaccination, safe water advice",
+   calc: "maint,pdose", l: "who,nice"},
+  {id: "asth", sp: 2, n: "Acute asthma exacerbation (child)", k: "asthma wheeze salbutamol breathless prednisolone bronchodilator",
+   sym: "Wheeze, cough, breathlessness, chest tightness, difficulty speaking|Worse at night or with triggers (viral infection, allergen, exercise)",
+   dx: "Recurrent wheeze with reversible airflow limitation. Severity of an attack:|Moderate: SpO\u2082 \u226592%, talking in sentences|Severe: SpO\u2082 <92%, too breathless to talk, HR >140 (2-5 y) or >125 (>5 y), RR >40 (2-5 y) or >30 (>5 y)|Life-threatening: silent chest, cyanosis, poor effort, exhaustion, confusion",
+   ddx: "Viral-induced wheeze|Bronchiolitis (infants)|Foreign body aspiration|Pneumonia|Anaphylaxis|Croup or vocal cord dysfunction|Cardiac cause",
+   ix: "Pulse oximetry; peak flow if \u22655 y and able|CXR only for focal signs, suspected pneumothorax or life-threatening disease|Blood gas if life-threatening or tiring; no routine bloods",
+   t1: "Oxygen to SpO\u2082 94-98%|Salbutamol 4-10 puffs (100 mcg) by spacer every 20 min for 3 doses, or nebulised 2.5 mg (<5 y) / 5 mg (\u22655 y)|Oral prednisolone 1-2 mg/kg (max 40 mg) once daily for 3-5 days, given early|Add ipratropium bromide 250 mcg nebulised for severe attacks",
+   t2: "IV magnesium sulfate 40 mg/kg (max 2 g) over 20 min for severe or life-threatening attacks|IV salbutamol or aminophylline only under senior/PICU guidance|Dexamethasone 0.6 mg/kg (max 16 mg) if prednisolone is vomited",
+   algo: "Assess severity (SpO\u2082, speech, RR, HR)|Mild-moderate: bronchodilator plus oral steroid; reassess at 20 min|Severe: oxygen, back-to-back salbutamol and ipratropium, steroid, senior review|No response: IV magnesium and PICU referral|Discharge when SpO\u2082 \u226594% in air, salbutamol needed \u22644-hourly and stable",
+   red: "Silent chest, cyanosis, exhaustion, confusion, SpO\u2082 <92% despite oxygen|Previous ICU admission or near-fatal asthma|Infant <2 y with a first wheeze (consider bronchiolitis or foreign body)",
+   em: "Oxygen, continuous monitoring, IV access, call for help, PICU referral|Bag-valve-mask ventilation or intubation as a last resort by an experienced clinician",
+   fu: "Review within 48 h-7 days of discharge; written asthma action plan|Check inhaler technique, spacer, adherence, triggers and vaccinations|Start or step up inhaled corticosteroid controller (GINA/BTS)",
+   calc: "pdose", l: "gina,bts,nice"},
+  {id: "pe", sp: 3, n: "Pre-eclampsia and eclampsia", k: "pregnancy hypertension proteinuria seizures magnesium sulfate labetalol",
+   sym: "Often asymptomatic|Headache, visual disturbance, epigastric or RUQ pain, sudden oedema, vomiting|Severe: hyperreflexia or clonus, low urine output, dyspnoea",
+   dx: "New hypertension \u2265140/90 mmHg on two readings after 20 weeks plus proteinuria (PCR \u226530 mg/mmol or \u2265300 mg/24 h) or organ dysfunction (platelets <100, creatinine >1.1 mg/dL, transaminases \u22652\u00d7 normal, pulmonary oedema, new neurological symptoms)|Severe features: BP \u2265160/110 mmHg",
+   ddx: "Chronic hypertension with or without superimposed pre-eclampsia|Gestational hypertension|HELLP syndrome|Acute fatty liver of pregnancy|TTP/HUS|Lupus nephritis|Epilepsy, migraine",
+   ix: "BP with correct cuff size; urine PCR or dipstick|FBC and platelets, creatinine, urate, LFTs, LDH, coagulation if severe|Fetal assessment: CTG, growth scan, liquor, umbilical artery Doppler|sFlt-1/PlGF ratio where available",
+   t1: "Antihypertensive if BP \u2265150/100: labetalol 200 mg orally (or IV 20 mg bolus then infusion), or modified-release nifedipine 10-20 mg; target below 150/100 mmHg|Magnesium sulfate for severe pre-eclampsia or eclampsia: 4 g IV over 5-20 min, then 1 g/h for 24 h|Antenatal corticosteroids (betamethasone 12 mg IM \u00d72, 24 h apart) if <34-35 weeks|Admit for severe disease",
+   t2: "IV hydralazine 5 mg slowly (repeat after 20-30 min) if labetalol or nifedipine are unsuitable|Methyldopa as an alternative oral agent|Avoid ACE inhibitors and ARBs in pregnancy",
+   algo: "Confirm diagnosis and severity; admit if severe|Control BP; give magnesium and steroids when indicated|Monitor mother (BP, urine output, reflexes, bloods) and fetus (CTG, scans)|Deliver at 37 weeks for mild disease, earlier for severe features, HELLP, fetal compromise or uncontrolled BP|Continue BP monitoring postpartum",
+   red: "BP \u2265160/110, headache or visual symptoms, seizure, RUQ pain, platelets <100, pulmonary oedema, fetal compromise|<34 weeks with severe features: tertiary unit",
+   em: "Eclampsia: ABC, left lateral position, MgSO\u2084 4 g IV over 5-10 min then 1 g/h (extra 2 g if seizure recurs), control BP, plan delivery after stabilisation|Watch for magnesium toxicity: reflexes, RR \u226512, urine output \u226525 mL/h; antidote calcium gluconate 1 g IV",
+   fu: "Postpartum BP check at 24-72 h and at 1-2 weeks; taper antihypertensives|Aspirin 75-150 mg daily from 12 weeks in future high-risk pregnancies|Annual BP, renal and cardiovascular risk review",
+   calc: "", l: "acog,rcog,who,nice"},
+  {id: "pph", sp: 3, n: "Postpartum haemorrhage", k: "bleeding delivery obstetric haemorrhage tranexamic oxytocin uterine atony",
+   sym: "Excessive vaginal bleeding after birth, soft boggy uterus|Tachycardia, hypotension, dizziness, pallor",
+   dx: "Blood loss \u2265500 mL after vaginal birth or \u22651000 mL after caesarean, or any loss causing haemodynamic compromise|Primary: within 24 h; secondary: 24 h to 12 weeks",
+   ddx: "The four Ts: Tone (atony, about 70%)|Trauma (tears, rupture, inversion)|Tissue (retained placenta or products, accreta)|Thrombin (coagulopathy, DIC)",
+   ix: "Quantify loss; shock index (HR/SBP >0.9 is concerning)|FBC, crossmatch, coagulation with fibrinogen, U&E, lactate|Ultrasound if retained products suspected|Point-of-care viscoelastic testing if available",
+   t1: "Call for help, empty the bladder, uterine massage|Oxytocin 10 IU IM (or 5 IU slow IV), then infusion|Tranexamic acid 1 g IV over 10 min within 3 h of birth (repeat once after 30 min if bleeding continues)|IV crystalloid, warmed fluids; examine for tears and retained tissue",
+   t2: "Further uterotonics: ergometrine 0.5 mg IM (not in hypertension), carboprost 250 mcg IM (not in asthma), misoprostol 800 mcg sublingual|Bimanual compression, aortic compression, intrauterine balloon tamponade|Surgery: compression sutures (B-Lynch), uterine artery ligation, hysterectomy; interventional radiology embolisation",
+   algo: "Recognise and call the team (obstetric, anaesthetic, haematology)|Resuscitate: two large-bore IVs, oxygen, fluids, group and crossmatch|Treat by cause (four Ts): massage, uterotonics, TXA|If bleeding continues: balloon tamponade, theatre|Massive transfusion protocol and correct coagulopathy; consider hysterectomy early",
+   red: "Shock, ongoing bleeding despite uterotonics, suspected rupture or inversion, DIC|Placenta accreta spectrum, multiple pregnancy or previous PPH: deliver where blood bank and theatre are available",
+   em: "Activate the massive haemorrhage protocol; transfuse red cells, plasma, platelets and fibrinogen in balanced ratios|Targets: Hb >8 g/dL, fibrinogen >2 g/L, platelets >50 \u00d710\u2079/L",
+   fu: "Observations hourly for at least 2 h then regularly; recheck Hb at 24-48 h|Treat anaemia with iron; postnatal review at 6 weeks|Debrief and plan future births (active management of the third stage)",
+   calc: "", l: "who,acog,rcog"},
+  {id: "fn", sp: 4, n: "Febrile neutropenia", k: "chemotherapy neutropenia fever sepsis cancer antibiotics oncology emergency",
+   sym: "Fever \u226538.3 \u00b0C once, or \u226538.0 \u00b0C for >1 h, in a patient on chemotherapy (usually 5-14 days after a cycle)|May have rigors, mucositis, cough or dysuria; signs of infection can be minimal|Hypotension, tachycardia or confusion suggest sepsis",
+   dx: "Temperature \u226538.3 \u00b0C (or \u226538.0 \u00b0C sustained for 1 h) with ANC <0.5 \u00d710\u2079/L, or expected to fall below 0.5 within 48 h",
+   ddx: "Bacteraemia or line infection|Pneumonia|UTI|Invasive fungal infection|Viral infection|Drug or transfusion fever|Tumour fever|Neutropenic enterocolitis",
+   ix: "FBC with differential, U&E, LFTs, CRP, lactate|Blood cultures (peripheral and each central-line lumen)|Urinalysis and culture, sputum, swabs and CXR as indicated; CT if localising signs|Risk-stratify with MASCC (\u226521 = low risk)",
+   t1: "IV antipseudomonal \u03b2-lactam within 60 min: piperacillin-tazobactam 4.5 g IV every 6-8 h (or cefepime 2 g every 8 h)|IV fluids, oxygen, analgesia|Observations at least every 4 h|De-escalate at 48-72 h if afebrile and cultures negative",
+   t2: "Meropenem if unstable, ESBL risk or prior ESBL infection|Add vancomycin or linezolid for line or skin infection, pneumonia or shock|Low risk (MASCC \u226521): oral ciprofloxacin plus amoxicillin-clavulanate with close follow-up|Empirical antifungal if fever persists beyond 4-7 days",
+   algo: "Recognise at triage and treat as sepsis|Take cultures, then give antibiotics within 60 min of arrival|Risk-stratify (MASCC, clinical picture)|High risk: admit on IV therapy; low risk: consider supervised oral treatment|Reassess at 48-72 h; stop when afebrile and neutrophils recovering",
+   red: "Hypotension, lactate >2 mmol/L, confusion, respiratory distress|ANC <0.1, expected neutropenia >7 days, mucositis, haematological malignancy|Contact oncology/haematology on call immediately",
+   em: "Sepsis bundle: 30 mL/kg crystalloid if hypotensive or lactate \u22654, vasopressors, ICU review|Never delay antibiotics for imaging or results",
+   fu: "Daily review while admitted; follow ANC until >0.5 \u00d710\u2079/L|Discharge when afebrile 24-48 h and clinically stable|Oncology decides on dose reduction or G-CSF prophylaxis|Give patients a thermometer and a 24-hour contact number",
+   calc: "", l: "idsa,asco,esmo,nccn"},
+  {id: "mscc", sp: 4, n: "Metastatic spinal cord compression", k: "back pain cancer cord compression weakness oncological emergency radiotherapy",
+   sym: "New or progressive back or neck pain (worse lying down, at night or on coughing), radicular pain|Limb weakness, sensory loss, gait difficulty, bladder or bowel dysfunction, saddle anaesthesia",
+   dx: "Clinical suspicion in a patient with known cancer (breast, prostate, lung, myeloma, renal) or unexplained cord or cauda equina signs|MRI of the whole spine confirms compression of the thecal sac or cord",
+   ddx: "Degenerative disc disease|Epidural abscess or vertebral osteomyelitis|Spinal haematoma|Non-malignant vertebral fracture|Radiculopathy|Transverse myelitis",
+   ix: "Whole-spine MRI within 24 h if neurological symptoms or signs (within 1 week if pain only)|FBC, U&E, calcium, ESR/CRP; PSA or protein electrophoresis as indicated|Full neurological exam including power, sensation, anal tone and bladder scan; staging imaging per primary tumour",
+   t1: "Dexamethasone 16 mg orally or IV (omit if lymphoma suspected before biopsy), per local protocol, with gastric protection|Analgesia; spinal precautions until stability is assessed|Surgery (decompression and stabilisation) for good prognosis, instability or radioresistant tumours|Radiotherapy (e.g. 8 Gy single fraction or 20 Gy in 5) for most patients",
+   t2: "Chemotherapy or hormonal therapy for sensitive tumours (lymphoma, myeloma, germ cell)|Stereotactic body radiotherapy in selected cases|Palliative care input when prognosis is poor",
+   algo: "Suspect MSCC: contact the MSCC coordinator or oncology on call immediately|Give steroids; immobilise if unstable pain|MRI whole spine within 24 h|MDT decision: surgery versus radiotherapy versus systemic therapy|Rehabilitation, bladder care, VTE prophylaxis and pressure-area care",
+   red: "Any neurological deficit, bladder or bowel symptoms, rapidly progressing weakness|Known cancer with back pain and red flags: same-day assessment",
+   em: "Treat as an oncological emergency: same-day specialist discussion, urgent MRI, steroids|Keep flat with log-roll if spinal instability is suspected",
+   fu: "Daily neurological review; mobilise only after stability is assessed|Radiotherapy review, rehabilitation and community care planning|Monitor glucose and give GI protection on dexamethasone; taper steroids after treatment",
+   calc: "", l: "nice,asco,esmo"},
+  {id: "ana", sp: 6, n: "Anaphylaxis", k: "allergy adrenaline epinephrine angioedema urticaria shock emergency",
+   sym: "Sudden skin or mucosal signs (urticaria, flushing, angioedema) after a trigger|Airway: stridor, hoarse voice, tongue or throat swelling|Breathing: wheeze, dyspnoea|Circulation: hypotension, tachycardia, collapse|GI: vomiting, cramps",
+   dx: "Acute illness with skin or mucosal involvement plus respiratory compromise or low BP (or end-organ dysfunction), OR hypotension, bronchospasm or laryngeal involvement after a known allergen even without skin signs|Serum tryptase within 1-2 h supports the diagnosis",
+   ddx: "Vasovagal syncope|Asthma attack|Panic attack or vocal cord dysfunction|Septic or cardiogenic shock|Hereditary angioedema|Mastocytosis|Scombroid poisoning",
+   ix: "Diagnosis is clinical: do not wait for tests|Serum tryptase: sample as soon as possible, again at 1-2 h, and a baseline after 24 h|Allergy testing (specific IgE, skin prick) later in a specialist clinic",
+   t1: "Remove the trigger, call for help, lie flat with legs raised (sit up if breathless)|Adrenaline IM into the anterolateral thigh: adult or >12 y 500 mcg (0.5 mL of 1:1000); 6-12 y 300 mcg; 6 months-6 y 150 mcg; repeat after 5 min if no improvement|High-flow oxygen; IV crystalloid 500-1000 mL (20 mL/kg in children) for hypotension|Nebulised salbutamol for wheeze",
+   t2: "Refractory (\u22652 IM doses): IV adrenaline infusion in a monitored setting by an experienced clinician|Glucagon for patients taking beta-blockers|Adjuncts only after resuscitation: chlorphenamine 10 mg IV (adult), hydrocortisone 200 mg IV; never delay adrenaline",
+   algo: "Recognise an ABCDE problem plus allergen exposure|IM adrenaline immediately; repeat at 5 min if needed|Oxygen, IV fluids, correct positioning|Observe for at least 6 h (up to 12 h if severe, \u22652 doses or asthma) for a biphasic reaction|Discharge with an adrenaline auto-injector, written plan and allergy referral",
+   red: "Stridor, severe bronchospasm, hypotension, or \u22652 adrenaline doses needed|Asthma, beta-blocker use, previous severe or biphasic reactions",
+   em: "Threatened airway: call anaesthesia early for intubation, prepare a surgical airway|Cardiac arrest: ALS protocol with adrenaline 1 mg IV and fluid resuscitation",
+   fu: "Refer every patient to an allergy specialist|Prescribe two adrenaline auto-injectors and teach their use|Trigger avoidance and medical alert identification; review at 4-6 weeks",
+   calc: "", l: "resus,nice,who"},
+  {id: "sepsis", sp: 6, n: "Sepsis and septic shock (adult)", k: "infection shock lactate hypotension antibiotics noradrenaline qsofa",
+   sym: "Fever or hypothermia, tachycardia, tachypnoea, confusion, reduced urine output, cold or mottled skin|Source-specific features (cough, dysuria, abdominal pain, wound)|Elderly and immunocompromised patients may be afebrile",
+   dx: "Sepsis: suspected or confirmed infection with life-threatening organ dysfunction (SOFA increase \u22652)|Septic shock: vasopressors needed to keep MAP \u226565 mmHg and lactate >2 mmol/L despite adequate fluids|qSOFA (\u22652 of RR \u226522, altered mentation, SBP \u2264100) is a prompt, not a rule-out tool",
+   ddx: "Non-infective SIRS (pancreatitis, burns, trauma)|Cardiogenic or hypovolaemic shock|Anaphylaxis|Adrenal crisis|Thyroid storm|Drug toxicity|Pulmonary embolism",
+   ix: "Lactate, blood cultures \u00d72 before antibiotics (do not delay >45 min), FBC, CRP or procalcitonin, U&E, LFTs, coagulation, glucose, gas|Urinalysis and culture, CXR, wound and sputum cultures; imaging for source (ultrasound or CT)|Repeat lactate in 2-4 h if raised",
+   t1: "Antibiotics within 1 h for shock or high probability of sepsis (within 3 h if sepsis is possible without shock): broad-spectrum per local source guideline (e.g. piperacillin-tazobactam 4.5 g IV; add vancomycin if MRSA risk)|Crystalloid 30 mL/kg within 3 h for hypotension or lactate \u22654|Noradrenaline first-line vasopressor if MAP <65 after fluids|Source control within 6-12 h (drain abscess, remove infected device)",
+   t2: "Add vasopressin when noradrenaline requirement is high|Hydrocortisone 200 mg/day for ongoing vasopressor need|Meropenem for ESBL or resistant-organism risk; antifungal if risk factors|Balanced crystalloids preferred over saline",
+   algo: "Screen (NEWS2/qSOFA) and call for help|Hour-1 bundle: lactate, cultures, antibiotics, fluids|Reassess perfusion (capillary refill, MAP, urine output, lactate)|Vasopressors for MAP <65; refer to ICU|Control the source; narrow antibiotics at 48-72 h guided by cultures",
+   red: "SBP <90 mmHg, lactate >2 mmol/L, falling GCS, RR >25, no urine for 12-18 h, mottled skin|Neutropenia, immunosuppression, pregnancy, extremes of age, indwelling devices: early senior and ICU review",
+   em: "Airway, oxygen, two large-bore IVs, fluids and antibiotics; do not delay antibiotics for imaging|Paediatric sepsis: 10-20 mL/kg boluses with reassessment; use the paediatric protocol",
+   fu: "Regular vital signs and lactate review; daily antimicrobial review|Early mobilisation, VTE prophylaxis, nutrition|Post-ICU follow-up for physical, cognitive and psychological effects; outpatient review within 1-2 weeks",
+   calc: "apache", l: "ssc,nice,who"}
+  ];
+
+  const lst = s => s.split("|").map(x => x.trim()).filter(Boolean);
+  const nav = document.getElementById("gl_list"), q = document.getElementById("gl_q"), panel = document.getElementById("gl_panel");
+  if (!nav || !q || !panel) return;
+  let cur = null;
+
+  function renderList() {
+    const t = q.value.trim().toLowerCase();
+    let h = "", n = 0;
+    SP.forEach((sp, i) => {
+      const items = D.filter(d => d.sp === i && (!t || (d.n + " " + d.k + " " + sp).toLowerCase().indexOf(t) >= 0));
+      if (!items.length) return;
+      n += items.length;
+      h += '<div class="cdt-grp"><div class="cdt-gl">' + E(sp) + '</div>' + items.map(d => '<button type="button" data-id="' + d.id + '"' + (cur && cur.id === d.id ? ' class="active"' : "") + '>' + E(d.n) + '</button>').join("") + '</div>';
+    });
+    nav.innerHTML = h || '<div class="cdt-msg">No matching condition.</div>';
+  }
+
+  function show(id) {
+    cur = D.find(d => d.id === id) || D[0];
+    renderList();
+    let h = '<h3 class="cdt-title">' + E(cur.n) + '</h3><p class="cdt-blurb">' + E(SP[cur.sp]) + '</p>';
+    for (const [key, title, open] of SEC) {
+      const items = lst(cur[key] || "");
+      if (!items.length) continue;
+      const tag = key === "algo" ? "ol" : "ul";
+      h += '<details class="gl-sec' + (key === "em" ? " gl-em" : key === "red" ? " gl-red" : "") + '"' + (open ? " open" : "") + '><summary>' + E(title) + '</summary><' + tag + ' class="bl">' + items.map(x => '<li>' + E(x) + '</li>').join("") + '</' + tag + '></details>';
+    }
+    const cs = lst((cur.calc || "").replace(/,/g, "|"));
+    if (cs.length) h += '<div class="gl-links"><b>Related calculators:</b> ' + cs.map(c => '<a href="#" onclick="showScreen(\'clinical\');cdtOpen(\'' + c + '\');return false">' + E(CALC[c] || c) + '</a>').join(" &middot; ") + '</div>';
+    h += '<div class="gl-links"><b>Trusted guidelines:</b> ' + cur.l.split(",").map(k => '<a href="' + L[k][1] + '" target="_blank" rel="noopener noreferrer">' + E(L[k][0]) + ' &#8599;</a>').join(" &middot; ") + '<div class="cdt-hint">Links open the publisher\'s guideline library; search it for the current version of this topic.</div></div>';
+    h += '<p class="cdt-foot">Concise decision support summarising major guidelines (ESC/ACC, NICE, WHO, BTS, GINA, IDSA, Surviving Sepsis, ACOG/RCOG, ASCO/ESMO). Doses are typical starting points: verify against the current guideline, local protocol and the individual patient. It does not replace clinical judgement.</p>';
+    panel.innerHTML = h;
+  }
+  q.addEventListener("input", renderList);
+  nav.addEventListener("click", e => { const b = e.target.closest("button[data-id]"); if (b) show(b.dataset.id); });
+  window.glOpen = show;
+  show(D[0].id);
 })();
 
 showScreen("home");
