@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f8fafc">
-<title>DocHELP | Clinical Pediatric Toolkit</title>
-<meta name="description" content="DocHELP: paediatric dosing, transfusion, drug interaction, vaccination and vitals tools.">
+<title>Dr.Help | Clinical Pediatric Toolkit</title>
+<meta name="description" content="Dr.Help: paediatric dosing, transfusion, drug interaction, vaccination and vitals tools.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%E2%9A%95%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <style>
   :root {
@@ -695,7 +695,7 @@
     <button id="backBtn" class="back-btn" onclick="showScreen('home')" hidden>&#8592; Home</button>
     <div class="logo-icon">&#9877;&#65039;</div>
     <div>
-      <h1 id="hTitle">DocHELP</h1>
+      <h1 id="hTitle">Dr.Help</h1>
       <p id="hSub">Pediatric & Clinical Decision Support Toolkit</p>
     </div>
   </div>
@@ -751,7 +751,7 @@
   <div class="hero">
     <div class="hero-text">
       <div class="eyebrow" id="greet">Welcome</div>
-      <h2>DocHELP Clinical Toolkit</h2>
+      <h2>Dr.Help Clinical Toolkit</h2>
       <p>Instant clinical calculations, resuscitation reference, FDA interaction cross-checking, and routine vaccination guidelines.</p>
       <div class="hero-search">
         <span class="gs-ico" aria-hidden="true">&#128269;</span>
@@ -855,7 +855,7 @@
   <div class="contact-section">
     <div>
       <h3 style="margin:0 0 6px; font-size:16px; font-weight:700;">Clinical Feedback & Contact</h3>
-      <p style="margin:0; font-size:13px; color:var(--muted);">For guideline updates, feedback, or inquiries regarding DocHELP.</p>
+      <p style="margin:0; font-size:13px; color:var(--muted);">For guideline updates, feedback, or inquiries regarding Dr.Help.</p>
     </div>
     <div class="contact-meta">
       <div class="meta-tag"><strong>Owner:</strong> Dr. Eman Eid</div>
@@ -866,7 +866,7 @@
     </div>
   </div>
 
-  <p class="disclaimer">DocHELP is a decision-support aid and does not replace clinical judgement.<br>Always verify doses against your local protocols and current formulary.</p>
+  <p class="disclaimer">Dr.Help is a decision-support aid and does not replace clinical judgement.<br>Always verify doses against your local protocols and current formulary.</p>
 
 </section>
 
@@ -1203,7 +1203,7 @@ const r = (x, d=2) => (isFinite(x) ? Number(x.toFixed(d)) : "-");
 const darkMQ = window.matchMedia("(prefers-color-scheme: dark)");
 
 function initTheme() {
-  applyTheme(localStorage.getItem("dochelp_theme") || "auto");
+  applyTheme(localStorage.getItem("Dr.Help_theme") || "auto");
 }
 
 function applyTheme(theme) {
@@ -1221,20 +1221,20 @@ function toggleTheme() {
   const attr = document.documentElement.getAttribute("data-theme");
   const isDark = attr === "dark" || (!attr && darkMQ.matches);
   const next = isDark ? "light" : "dark";
-  localStorage.setItem("dochelp_theme", next);
+  localStorage.setItem("Dr.Help_theme", next);
   applyTheme(next);
 }
 
 // follow OS changes while the user hasn't picked a theme manually
 darkMQ.addEventListener("change", () => {
-  if (!localStorage.getItem("dochelp_theme")) applyTheme("auto");
+  if (!localStorage.getItem("Dr.Help_theme")) applyTheme("auto");
 });
 
 initTheme();
 
 /* Screen Routing */
 const SCREENS = {
-  home: ["DocHELP", "Pediatric & Clinical Decision Support Toolkit"],
+  home: ["Dr.Help", "Pediatric & Clinical Decision Support Toolkit"],
   dosing: ["Paediatric Dosing Calculator", "Weight-based dosing, emergency drugs, fluids, BSA, and custom formulas"],
   transfusion: ["Transfusion Calculator", "Component volumes and infusion rates by weight"],
   interactions: ["Drug Interactions", "Interactions and contraindications from FDA drug labels"],
@@ -3648,7 +3648,7 @@ function updateSidebar() {
 function toggleSidebar() {
   if (SB_MOBILE()) { document.body.classList.toggle("sb-open"); return; }
   const collapsed = document.body.classList.toggle("sb-collapsed");
-  try { localStorage.setItem("dochelp_sidebar", collapsed ? "closed" : "open"); } catch (e) {}
+  try { localStorage.setItem("Dr.Help_sidebar", collapsed ? "closed" : "open"); } catch (e) {}
   setHeaderH();
 }
 function closeSidebarMobile() { document.body.classList.remove("sb-open"); }
@@ -3665,7 +3665,7 @@ function setHeaderH() {
 }
 window.addEventListener("resize", () => { setHeaderH(); if (!SB_MOBILE()) closeSidebarMobile(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeSidebarMobile(); });
-try { if (localStorage.getItem("dochelp_sidebar") === "closed") document.body.classList.add("sb-collapsed"); } catch (e) {}
+try { if (localStorage.getItem("Dr.Help_sidebar") === "closed") document.body.classList.add("sb-collapsed"); } catch (e) {}
 setHeaderH();
 
 
