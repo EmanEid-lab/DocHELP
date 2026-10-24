@@ -6,7 +6,23 @@
 <meta name="theme-color" content="#f8fafc">
 <title>Dr.Help | Clinical Decision Support </title>
 <meta name="description" content="Dr.Help: Diseases and guidelines, paediatric dosing, transfusion, drug interaction, vaccination and vitals tools.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%E2%9A%95%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Dr.Help">
+<meta property="og:title" content="Dr.Help | Clinical Decision Support">
+<meta property="og:description" content="Paediatric dosing, transfusion, drug interactions, vaccination schedule, vitals and guidelines in one toolkit.">
+<meta property="og:url" content="https://emaneid-lab.github.io/DocHELP-public/">
+<meta property="og:image" content="https://emaneid-lab.github.io/DocHELP-public/og-image.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Dr.Help logo: a stethoscope with a heart">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dr.Help | Clinical Decision Support">
+<meta name="twitter:description" content="Paediatric dosing, transfusion, drug interactions, vaccination schedule, vitals and guidelines.">
+<meta name="twitter:image" content="https://emaneid-lab.github.io/DocHELP-public/og-image.png">
+<link rel="icon" type="image/png" sizes="192x192" href="logo-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20110%20110%22%3E%3Crect%20width=%22110%22%20height=%22110%22%20rx=%2226%22%20fill=%22%230d9488%22/%3E%3Cpath%20d=%22M34%2028V46C34%2062%2044%2068%2055%2068C66%2068%2076%2062%2076%2046V28M55%2068V76%22%20fill=%22none%22%20stroke=%22%23ffffff%22%20stroke-width=%225%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3Ccircle%20cx=%2234%22%20cy=%2225%22%20r=%225%22%20fill=%22%23ffffff%22/%3E%3Ccircle%20cx=%2276%22%20cy=%2225%22%20r=%225%22%20fill=%22%23ffffff%22/%3E%3Cpath%20d=%22M55%20100C42%2091%2040%2080%2047%2077C51%2075%2055%2077%2055%2080C55%2077%2059%2075%2063%2077C70%2080%2068%2091%2055%20100Z%22%20fill=%22%23ffffff%22/%3E%3C/svg%3E">
 <style>
   :root {
     --bg: #f8fafc;
@@ -101,9 +117,10 @@
     align-items: center;
   }
   .brand-group { display: flex; align-items: center; gap: 14px; }
+  .logo-icon svg { width: 100%; height: 100%; display: block; }
   .logo-icon {
     font-size: 26px;
-    background: var(--accent-light);
+    background: transparent;
     color: var(--accent);
     width: 44px;
     height: 44px;
@@ -568,7 +585,7 @@
     /* header: compact */
     header { padding: 8px 12px; padding-top: max(8px, env(safe-area-inset-top)); }
     .brand-group { gap: 8px; min-width: 0; }
-    .logo-icon { display: none; }
+    .logo-icon { width: 32px; height: 32px; flex: none; }
     header h1 { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 52vw; }
     .back-btn { padding: 8px 10px; }
 
@@ -693,7 +710,7 @@
   <div class="brand-group">
     <button id="menuBtn" class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu" aria-controls="sidebar">&#9776;</button>
     <button id="backBtn" class="back-btn" onclick="showScreen('home')" hidden>&#8592; Home</button>
-    <div class="logo-icon">&#9877;&#65039;</div>
+    <div class="logo-icon"><svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DocHELP logo"><rect width="110" height="110" rx="26" fill="#0d9488"/><path d="M34 28V46C34 62 44 68 55 68C66 68 76 62 76 46V28M55 68V76" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="34" cy="25" r="5" fill="#ffffff"/><circle cx="76" cy="25" r="5" fill="#ffffff"/><path d="M55 100C42 91 40 80 47 77C51 75 55 77 55 80C55 77 59 75 63 77C70 80 68 91 55 100Z" fill="#ffffff"/></svg></div>
     <div>
       <h1 id="hTitle">Dr.Help</h1>
       <p id="hSub">Clinical Decision Support</p>
