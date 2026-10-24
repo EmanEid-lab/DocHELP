@@ -549,13 +549,16 @@
   @media (max-width: 768px) {
     /* navigation: bottom bar replaces the sidebar */
     #sidebar, #sbOverlay, .menu-btn { display: none !important; }
-    .mnav { --mc: #bfe3ff; --mb: #9fcdf5; display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; background: linear-gradient(var(--mb), var(--mb)) top / 100% 1px no-repeat, linear-gradient(var(--mc), var(--mc)) top / 100% 61px no-repeat; padding: 0 0 env(safe-area-inset-bottom); pointer-events: none; }
-    .mnav button { pointer-events: auto; flex: 1; min-width: 0; border: 0; background: none; color: #35506b; font: inherit; font-size: 11px; font-weight: 600; padding: 0; margin: 6px 3px; min-height: 48px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; }
+    .mnav { --mc: #bfe3ff; --mb: #9fcdf5; display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; background: var(--mc); border-top: 1px solid var(--mb); padding: 0 0 env(safe-area-inset-bottom); pointer-events: none; }
+    .mnav button { pointer-events: auto; flex: 1; min-width: 0; border: 0; background: none; color: #35506b; font: inherit; font-size: 11px; font-weight: 600; padding: 0; margin: 8px 3px; min-height: 54px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; }
     .mnav button.on { color: #075985; background: rgba(255, 255, 255, 0.75); }
     :root[data-theme="dark"] .mnav { --mc: #ffffff; --mb: #e2e8f0; }
     :root[data-theme="dark"] .mnav button { color: #475569; }
     :root[data-theme="dark"] .mnav button.on { color: #075985; background: #dbeeff; }
     .mnav svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .mnav button[data-m="dosing"] svg { stroke: #0284c7; }
+    .mnav button[data-m="safety"] svg { stroke: #ea580c; }
+    .mnav button[data-m="clinical"] svg { stroke: #4f46e5; }
 
     /* stop iOS zoom-on-focus and enlarge tap targets */
     input, select, textarea { font-size: 16px; min-height: 44px; }
@@ -570,7 +573,7 @@
     .back-btn { padding: 8px 10px; }
 
     /* layout */
-    .container { padding: 12px 12px calc(84px + env(safe-area-inset-bottom)); }
+    .container { padding: 12px 12px calc(92px + env(safe-area-inset-bottom)); }
     .card, .panel, .vpanel, #cdt_panel, .gl-panel { padding: 14px; }
     .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 
@@ -605,7 +608,7 @@
     .age-row select { width: 96px !important; }
 
     /* primary action stays reachable above the bottom bar */
-    .panel > button.go, #screen-transfusion .card > button.go { position: sticky; bottom: calc(66px + env(safe-area-inset-bottom)); width: 100%; z-index: 20; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22); }
+    .panel > button.go, #screen-transfusion .card > button.go { position: sticky; bottom: calc(76px + env(safe-area-inset-bottom)); width: 100%; z-index: 20; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22); }
 
     /* safety checker: collapsible steps */
     .m-hide { display: none; }
@@ -645,7 +648,7 @@
     #sc_sec_pat .row > div:has(#sc_age), #sc_sec_pat .row > div:not(:has(input, select)) { grid-column: 1 / -1; }
     #sc_sec_pat .row > div:has(#sc_age) .row { grid-template-columns: 1fr 1fr; }
     .sc-row { border: 1px solid var(--line); border-radius: 12px; padding: 10px; background: var(--bg); }
-    .card .row:has(#sc_btn) { position: sticky; bottom: calc(66px + env(safe-area-inset-bottom)); z-index: 20; }
+    .card .row:has(#sc_btn) { position: sticky; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 20; }
     .card .row:has(#sc_btn) .go { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22); }
     .msheet:not([hidden]) { display: block; position: fixed; inset: 0; z-index: 200; background: rgba(15, 23, 42, 0.5); }
     .msheet-panel { position: absolute; left: 0; right: 0; bottom: 0; max-height: 82vh; overflow-y: auto; background: var(--bg); border-radius: 18px 18px 0 0; padding: 14px 14px calc(18px + env(safe-area-inset-bottom)); }
@@ -659,6 +662,18 @@
     :root:not([data-theme="light"]):not([data-theme="dark"]) .mnav { --mc: #ffffff; --mb: #e2e8f0; }
     :root:not([data-theme="light"]):not([data-theme="dark"]) .mnav button { color: #475569; }
     :root:not([data-theme="light"]):not([data-theme="dark"]) .mnav button.on { color: #075985; background: #dbeeff; }
+  }
+
+  /* ===== Unique colour per tool icon ===== */
+  .tool-icon, .sb-ico { color: var(--ic, var(--accent)); }
+  .tool-icon { background: color-mix(in srgb, var(--ic, var(--accent)) 14%, transparent) !important; }
+  .ico { width: 1em; height: 1em; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; display: block; }
+  .tool-icon .ico { width: 60%; height: 60%; }
+  .sb-ico .ico { width: 18px; height: 18px; }
+  :root[data-theme="dark"] .tool-icon, :root[data-theme="dark"] .sb-ico { color: var(--ic-d, var(--ic)); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]):not([data-theme="dark"]) .tool-icon,
+    :root:not([data-theme="light"]):not([data-theme="dark"]) .sb-ico { color: var(--ic-d, var(--ic)); }
   }
 </style>
 </head>
@@ -688,7 +703,7 @@
   <button class="sb-item" data-screen="home" onclick="goScreen('home')"><span class="sb-ico">&#127968;</span>Home</button>
 
   <div class="sb-label">Tools</div>
-  <button class="sb-item" data-screen="dosing" onclick="goScreen('dosing')"><span class="sb-ico">&#128138;</span>Paediatric Dosing</button>
+  <button class="sb-item" data-screen="dosing" onclick="goScreen('dosing')"><span class="sb-ico" style="--ic:#0284c7;--ic-d:#38bdf8"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-35 12 12)"/><path d="M9.5 8.5l6 6"/></svg></span>Paediatric Dosing</button>
   <div class="sb-subs" data-screen="dosing">
     <button class="sb-sub" data-screen="dosing" data-tab="drug" onclick="goTab('dosing','drug')">Drug dose</button>
     <button class="sb-sub" data-screen="dosing" data-tab="formula" onclick="goTab('dosing','formula')">Custom formula</button>
@@ -697,14 +712,14 @@
     <button class="sb-sub" data-screen="dosing" data-tab="body" onclick="goTab('dosing','body')">Weight / BSA / eGFR</button>
   </div>
 
-  <button class="sb-item" data-screen="transfusion" onclick="goScreen('transfusion')"><span class="sb-ico">&#129656;</span>Transfusion Guide</button>
-  <button class="sb-item" data-screen="interactions" onclick="goScreen('interactions')"><span class="sb-ico">&#9879;&#65039;</span>Drug Interactions</button>
-  <button class="sb-item" data-screen="safety" onclick="goScreen('safety')"><span class="sb-ico">&#128737;&#65039;</span>Prescriptions Safety Checker</button>
-  <button class="sb-item" data-screen="vaccines" onclick="goScreen('vaccines')"><span class="sb-ico">&#128137;</span>Egyptian Immunization</button>
+  <button class="sb-item" data-screen="transfusion" onclick="goScreen('transfusion')"><span class="sb-ico" style="--ic:#e11d48;--ic-d:#fb7185"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg></span>Transfusion Guide</button>
+  <button class="sb-item" data-screen="interactions" onclick="goScreen('interactions')"><span class="sb-ico" style="--ic:#9333ea;--ic-d:#c084fc"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="5.5"/><circle cx="15" cy="12" r="5.5"/></svg></span>Drug Interactions</button>
+  <button class="sb-item" data-screen="safety" onclick="goScreen('safety')"><span class="sb-ico" style="--ic:#ea580c;--ic-d:#fb923c"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>Prescriptions Safety Checker</button>
+  <button class="sb-item" data-screen="vaccines" onclick="goScreen('vaccines')"><span class="sb-ico" style="--ic:#0d9488;--ic-d:#2dd4bf"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2l4 4M17 7l3-3M19 9l-8.7 8.7a1 1 0 0 1-1.4 0l-3.6-3.6a1 1 0 0 1 0-1.4L14 4M9 11l4 4M5 19l-3 3M14 7l3 3"/></svg></span>Egyptian Immunization</button>
 
-  <button class="sb-item" data-screen="clinical" onclick="goScreen('clinical')"><span class="sb-ico">&#129518;</span>Clinical Decision Tool</button>
-  <button class="sb-item" data-screen="guidelines" onclick="goScreen('guidelines')"><span class="sb-ico">&#129658;</span>Diseases &amp; Guidelines</button>
-  <button class="sb-item" data-screen="vitals" onclick="goScreen('vitals')"><span class="sb-ico">&#129658;</span>Vitals &amp; GCS</button>
+  <button class="sb-item" data-screen="clinical" onclick="goScreen('clinical')"><span class="sb-ico" style="--ic:#4f46e5;--ic-d:#818cf8"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2"/></svg></span>Clinical Decision Tool</button>
+  <button class="sb-item" data-screen="guidelines" onclick="goScreen('guidelines')"><span class="sb-ico" style="--ic:#65a30d;--ic-d:#a3e635"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg></span>Diseases &amp; Guidelines</button>
+  <button class="sb-item" data-screen="vitals" onclick="goScreen('vitals')"><span class="sb-ico" style="--ic:#d97706;--ic-d:#fbbf24"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg></span>Vitals &amp; GCS</button>
   <div class="sb-subs" data-screen="vitals">
     <button class="sb-sub" data-screen="vitals" data-tab="vitals" onclick="goTab('vitals','vitals')">Vital signs check</button>
     <button class="sb-sub" data-screen="vitals" data-tab="gcs" onclick="goTab('vitals','gcs')">Paediatric GCS</button>
@@ -755,7 +770,7 @@
   <div class="tools-grid">
     <div class="tool-card dosing" role="button" tabindex="0" onclick="showScreen('dosing')">
       <div>
-        <div class="tool-icon">&#128138;</div>
+        <div class="tool-icon" style="--ic:#0284c7;--ic-d:#38bdf8"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-35 12 12)"/><path d="M9.5 8.5l6 6"/></svg></div>
         <h3 class="tool-title">Paediatric Dosing</h3>
         <p class="tool-desc">Weight-based mg/kg calculators, resus/APLS drugs, custom formulas, maintenance fluids (4-2-1), BSA and eGFR.</p>
       </div>
@@ -764,7 +779,7 @@
 
     <div class="tool-card transfusion" role="button" tabindex="0" onclick="showScreen('transfusion')">
       <div>
-        <div class="tool-icon">&#129656;</div>
+        <div class="tool-icon" style="--ic:#e11d48;--ic-d:#fb7185"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg></div>
         <h3 class="tool-title">Transfusion Guide</h3>
         <p class="tool-desc">Packed Red Blood Cells (PRBC) with target Hb titration, Platelets, FFP, and Cryoprecipitate rates.</p>
       </div>
@@ -773,7 +788,7 @@
 
     <div class="tool-card interactions" role="button" tabindex="0" onclick="showScreen('interactions')">
       <div>
-        <div class="tool-icon">&#9879;&#65039;</div>
+        <div class="tool-icon" style="--ic:#9333ea;--ic-d:#c084fc"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="5.5"/><circle cx="15" cy="12" r="5.5"/></svg></div>
         <h3 class="tool-title">Drug Interactions</h3>
         <p class="tool-desc">Live openFDA label scanner highlighting contraindications, boxed warnings, and severity-graded interactions.</p>
       </div>
@@ -782,7 +797,7 @@
 
     <div class="tool-card interactions" role="button" tabindex="0" onclick="showScreen('safety')">
       <div>
-        <div class="tool-icon">&#128737;&#65039;</div>
+        <div class="tool-icon" style="--ic:#ea580c;--ic-d:#fb923c"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
         <h3 class="tool-title">Prescriptions Safety Checker</h3>
         <p class="tool-desc">Enter a patient's medicines and clinical details to flag interactions, allergies, duplicates, contraindications, dose errors and monitoring.</p>
       </div>
@@ -791,7 +806,7 @@
 
     <div class="tool-card vaccines" role="button" tabindex="0" onclick="showScreen('vaccines')">
       <div>
-        <div class="tool-icon">&#128137;</div>
+        <div class="tool-icon" style="--ic:#0d9488;--ic-d:#2dd4bf"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2l4 4M17 7l3-3M19 9l-8.7 8.7a1 1 0 0 1-1.4 0l-3.6-3.6a1 1 0 0 1 0-1.4L14 4M9 11l4 4M5 19l-3 3M14 7l3 3"/></svg></div>
         <h3 class="tool-title">Egyptian Immunization</h3>
         <p class="tool-desc">Official Egyptian MOHP mandatory childhood schedule from birth to school entry with age milestone filters.</p>
       </div>
@@ -800,7 +815,7 @@
 
     <div class="tool-card clinical" role="button" tabindex="0" onclick="showScreen('clinical')">
       <div>
-        <div class="tool-icon">&#129518;</div>
+        <div class="tool-icon" style="--ic:#4f46e5;--ic-d:#818cf8"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M8 15h2M12 15h2"/></svg></div>
         <h3 class="tool-title">Clinical Decision Tool</h3>
         <p class="tool-desc">BMI/BSA, eGFR, corrected calcium and sodium, anion gap, CHA&#8322;DS&#8322;-VASc, HAS-BLED, Wells, CURB-65, APACHE II, GCS, doses and infusions, each with method, interpretation and limits.</p>
       </div>
@@ -809,7 +824,7 @@
 
     <div class="tool-card guidelines" role="button" tabindex="0" onclick="showScreen('guidelines')">
       <div>
-        <div class="tool-icon">&#129658;</div>
+        <div class="tool-icon" style="--ic:#65a30d;--ic-d:#a3e635"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg></div>
         <h3 class="tool-title">Diseases &amp; Clinical Guidelines</h3>
         <p class="tool-desc">Concise guidance by specialty: criteria, investigations, first-line and alternative treatment, algorithms, red flags, emergency care, follow-up and guideline links.</p>
       </div>
@@ -818,7 +833,7 @@
 
     <div class="tool-card vitals" role="button" tabindex="0" onclick="showScreen('vitals')">
       <div>
-        <div class="tool-icon">&#129658;</div>
+        <div class="tool-icon" style="--ic:#d97706;--ic-d:#fbbf24"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg></div>
         <h3 class="tool-title">Vitals &amp; GCS</h3>
         <p class="tool-desc">Age-based normal ranges for HR, RR, BP and SpO2 with abnormal-value flags, plus the paediatric Glasgow Coma Scale.</p>
       </div>
